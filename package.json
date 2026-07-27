@@ -10,9 +10,11 @@
   },
   "scripts": {
     "build": "pnpm --recursive --if-present build",
+    "dev": "pnpm --filter @asteria/desktop dev",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
+    "smoke:desktop": "pnpm --filter @asteria/desktop smoke",
     "test": "pnpm build && vitest run",
     "typecheck": "pnpm --recursive --if-present typecheck"
   },

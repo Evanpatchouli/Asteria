@@ -19,3 +19,11 @@ workspace 包的 `types` 入口应指向源码，避免全新克隆在首次构�
 ## 异步初始化生命周期
 
 可销毁对象在异步初始化失败时，错误恢复逻辑必须先检查对象是否已销毁。否则初始化 Promise 的后续 `catch` 可能把已销毁实例错误恢复为可初始化状态。
+
+## Electron 沙箱 Preload
+
+Electron 的沙箱 Preload 不能使用 `.mjs` ESM 入口，只能使用受限的 CommonJS `require`。构建时应完整打包 Preload 依赖并输出单个 CommonJS 文件，不能通过关闭 `sandbox` 解决加载失败。
+
+共享包的根 Barrel 可能把与 IPC 无关的运行时 Schema 一并打入 Preload。为启动敏感入口提供窄 Subpath Export，可以显著减少 Preload 体积并保持安全边界清晰。
+
+Electron 43 的 npm 包会在首次执行 CLI 时按需下载二进制；首次启动冒烟可能明显慢于后续运行。

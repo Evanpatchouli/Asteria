@@ -16,3 +16,14 @@
 - `agent.idle` 是显式复位事件，可强制回到 `idle`。
 - `happy` 和 `error` 是瞬时状态，通过环境注入的调度器回落到 `idle`。
 - Runtime 只消费动作名称和最小 Renderer Port，不依赖具体渲染引擎或资源路径。
+
+## 2026-07-27：Electron 基础工程
+
+- Electron 应用使用 `apps/desktop/src/{main,preload,renderer}` 三入口。
+- 使用 electron-vite 统一 Main、Preload 和 Renderer 的开发与构建流程。
+- electron-vite 5 的 Peer 范围止于 Vite 7，因此 Desktop 包固定使用 Vite 7，不依赖根测试工具传递安装的 Vite。
+- Renderer 保持 `contextIsolation: true`、`nodeIntegration: false` 和 `sandbox: true`。
+- 沙箱 Preload 完整打包为单个 CommonJS 产物，不通过禁用沙箱规避 ESM 限制。
+- `@asteria/shared/ipc` 作为 Preload 的窄共享契约入口，避免把事件校验 Schema 打入 Preload 启动包。
+- 外部 Agent Event 由 Main Process 使用 `forwardAgentEvent` 完成运行时校验后再发送，Preload 只接收已验证事件。
+- 生产 Renderer CSP 不开放 WebSocket；开发 CSP 仅允许 localhost 和 127.0.0.1 的 Vite HMR WebSocket。

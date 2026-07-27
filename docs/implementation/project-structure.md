@@ -12,6 +12,10 @@
 
     ├── apps/
     │   └── desktop/
+    │       └── src/
+    │           ├── main/
+    │           ├── preload/
+    │           └── renderer/
 
     ├── packages/
     │   ├── agent-core/
@@ -29,7 +33,11 @@
 
 ### apps/desktop
 
-Electron 应用入口。
+Electron 应用入口：
+
+-   `main` 管理窗口和应用生命周期
+-   `preload` 提供类型化安全桥
+-   `renderer` 承载 React UI、Pet Runtime 和 Renderer
 
 ### packages/agent-core
 

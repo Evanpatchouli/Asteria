@@ -55,6 +55,10 @@ ai-pet/
 
 ## TASK-002 Electron 基础工程
 
+状态：
+
+DONE
+
 
 完成：
 
@@ -79,6 +83,10 @@ pnpm dev
 
 
 ## TASK-010 透明窗口
+
+状态：
+
+DONE
 
 
 实现：
