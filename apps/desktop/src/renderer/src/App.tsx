@@ -1,11 +1,7 @@
 export function App(): React.JSX.Element {
   return (
-    <main className="desktop-shell">
-      <section className="runtime-status" aria-labelledby="runtime-title">
-        <div className="runtime-mark" aria-hidden="true" />
-        <h1 id="runtime-title">Asteria</h1>
-        <p>Desktop runtime ready</p>
-      </section>
+    <main className="desktop-shell" aria-label="Asteria desktop companion">
+      <span className="visually-hidden">PixiJS renderer active</span>
     </main>
   );
 }

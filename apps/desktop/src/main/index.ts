@@ -103,6 +103,9 @@ async function openMainWindow(): Promise<MainWindowHandle> {
       size: "small",
     });
     desktopTray = createDesktopTray(icon, {
+      centerWindow() {
+        windowController?.centerWindow();
+      },
       hideWindow() {
         windowController?.hideWindow();
       },

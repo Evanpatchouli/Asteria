@@ -39,3 +39,17 @@ Electron 43 的 npm 包会在首次执行 CLI 时按需下载二进制；首次�
 异步状态写入需要串行化并使用临时文件原子替换，否则快速拖动时可能发生旧坐标覆盖新坐标或留下截断 JSON。
 
 进程内写入队列不能解决多个应用实例竞争同一状态文件。持久化原生窗口状态时，应同时使用 Electron 单实例锁约束写入者数量。
+
+## PixiJS Renderer 生命周期
+
+PixiJS 8 的 `Application` 必须异步初始化。Renderer 在初始化过程中被销毁时，初始化完成回调必须先检查销毁状态，并立即释放刚创建的 GPU 资源，不能让实例恢复为 ready。
+
+异步初始化的清理边界不能只覆盖 `Application.init()` 本身。初始化成功后的纹理生成、场景挂载或 DOM 挂载仍可能失败，整个初始化事务都必须进入统一清理路径；重试时应创建新的 Application，不能复用已部分初始化的实例。
+
+严格 CSP 禁止 `unsafe-eval` 时，PixiJS 8 默认 Renderer 会在初始化阶段主动失败。应加载 `pixi.js/unsafe-eval` 提供的静态同步实现，不能为了通过能力检查而放宽 Electron Renderer 的 `script-src`。
+
+逐帧动画应由 PixiJS 私有 Ticker 驱动。React 只承担低频 UI，不能持有 Sprite 变换或每帧更新状态。
+
+程序化 Graphics 可以在初始化阶段生成临时 Texture，再通过 Sprite 验证完整渲染链路；正式角色资源和 Resource Loader 不应因此提前进入基础 Renderer 周期。
+
+workspace 包的运行时导出指向 `dist` 时，应用的开发和冒烟命令必须预构建依赖；仅保证根构建拓扑正确不足以支持干净检出后的首次开发启动。

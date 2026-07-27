@@ -53,7 +53,13 @@ Electron 应用入口：
 
 ### packages/renderer
 
-负责动画渲染。
+负责动画渲染：
+
+-   `PixiPetRenderer` 实现 Phase 1 Renderer Port
+-   管理 PixiJS Application、Ticker、Canvas 和 GPU 资源生命周期
+-   提供临时占位 Sprite 与状态动作映射
+
+该包不依赖 React，不处理 Agent Event，不管理窗口。
 
 ### packages/shared
 

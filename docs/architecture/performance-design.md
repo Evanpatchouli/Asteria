@@ -19,6 +19,10 @@
 
 动画循环：
 
+    PixiJS private Ticker
+
+    ↓
+
     requestAnimationFrame
 
     ↓
@@ -55,6 +59,10 @@
 
     Animation
 
+当前 `PixiPetRenderer` 将私有 Ticker 限制为最高 `60 FPS`，避免使用跨实例的
+共享 Ticker。Canvas 使用透明 WebGL Renderer，设备像素比通过 `autoDensity`
+处理。
+
 ## 3. 资源优化
 
 包括：
@@ -62,6 +70,7 @@
 -   纹理压缩
 -   延迟加载
 -   动画缓存
+-   Renderer 销毁时释放场景、纹理、Canvas 和 GPU Context
 
 ## 4. 性能监控
 

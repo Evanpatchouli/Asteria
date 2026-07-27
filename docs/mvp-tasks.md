@@ -144,6 +144,10 @@ PARTIAL
 
 ## TASK-020 集成 PixiJS
 
+状态：
+
+DONE
+
 
 实现：
 
@@ -164,6 +168,10 @@ Animation
 
 ## TASK-021 动画循环
 
+状态：
+
+DONE
+
 
 要求：
 
@@ -181,17 +189,20 @@ requestAnimationFrame()
 
 ## TASK-022 Renderer API
 
+状态：
+
+DONE
+
 
 定义：
 
 ```ts
-interface PetRenderer {
+interface PetRendererPort {
 
+  initialize():Promise<void>;
   play(animation:string):void;
-
-  stop():void;
-
-  setExpression(name:string):void;
+  stop(animation:string):void;
+  destroy():void;
 
 }
 ```

@@ -28,10 +28,12 @@
 
 ## 3. Render Loop
 
-使用：
+PixiJS 实现使用应用私有 Ticker。Ticker 基于
+`requestAnimationFrame()` 驱动，并限制最高 `60 FPS`：
 
 ``` ts
-requestAnimationFrame()
+app.ticker.maxFPS = 60;
+app.ticker.add(update);
 ```
 
 流程：
@@ -60,10 +62,20 @@ React 不负责：
 -   每帧更新
 -   Sprite 控制
 
+Desktop Renderer 入口只负责组合和生命周期启动。当前周期在 Pet Runtime
+接线前启动默认 `idle` 占位动作；后续由 Pet Runtime 接管 `play` 和 `stop`。
+
 ## 5. Renderer 实现
 
-支持：
+当前：
 
--   PixiRenderer
+-   `packages/renderer`
+-   `PixiPetRenderer`
+-   透明 Canvas
+-   程序化占位 Sprite
+-   `PetRendererPort` 适配
+
+未来支持：
+
 -   ThreeRenderer
 -   Live2DRenderer

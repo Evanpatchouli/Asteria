@@ -1,6 +1,10 @@
 import { type BrowserWindow, screen } from "electron";
 
-import { resolveWindowPosition, type WindowSize } from "./window-position.js";
+import {
+  calculateCenteredPosition,
+  resolveWindowPosition,
+  type WindowSize,
+} from "./window-position.js";
 import {
   createWindowState,
   type WindowState,
@@ -79,6 +83,31 @@ export class WindowController {
     if (!this.#window.isDestroyed() && this.#window.isVisible()) {
       this.#window.hide();
     }
+  }
+
+  /**
+   * Moves the window to the primary work area's center and reveals it without
+   * taking focus from the active application.
+   */
+  centerWindow(): void {
+    if (this.#disposed || this.#window.isDestroyed()) {
+      return;
+    }
+
+    this.#clearPositionSaveTimer();
+
+    const position = calculateCenteredPosition(
+      this.#screen.getPrimaryDisplay().workArea,
+      this.#windowSize,
+    );
+
+    this.#window.setPosition(position.x, position.y);
+
+    if (!this.#window.isVisible()) {
+      this.#window.showInactive();
+    }
+
+    void this.#persistCurrentState();
   }
 
   /**

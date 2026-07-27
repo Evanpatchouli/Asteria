@@ -38,3 +38,14 @@
 - 系统托盘是隐藏窗口和鼠标穿透状态的永久恢复入口。
 - 窗口状态使用 Main 私有版本化 JSON 文件，不进入共享 IPC 契约或 Renderer `localStorage`。
 - 应用使用 Electron 单实例锁，避免重复窗口、托盘和跨进程状态文件写入竞争；第二实例只唤醒现有窗口。
+
+## 2026-07-28：PixiJS Renderer MVP
+
+- PixiJS 实现位于独立的 `packages/renderer`，Desktop Renderer 只负责组合启动。
+- `PixiPetRenderer` 实现 Pet Runtime 已定义的窄 `PetRendererPort`，不接收 Agent Event 或宠物状态。
+- PixiJS Application 使用透明 WebGL Canvas、私有 Ticker 和最高 `60 FPS` 限制。
+- React 不持有 Sprite 或逐帧动画状态。
+- 本周期使用程序化纹理生成占位 Sprite，正式资源加载器留到后续周期。
+- Renderer 销毁必须同时释放 Ticker、场景、纹理、Canvas 和 GPU Context。
+- 初始化失败时释放当前 Application；后续重试创建新实例，不复用可能被污染的 PixiJS Application。
+- Desktop 开发和冒烟命令在启动前按 workspace 拓扑构建运行时依赖。

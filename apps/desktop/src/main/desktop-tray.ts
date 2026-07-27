@@ -6,6 +6,8 @@ import {
 } from "electron";
 
 export interface DesktopTrayActions {
+  /** Centers and reveals the desktop window. */
+  centerWindow(): void;
   hideWindow(): void;
   isClickThrough(): boolean;
   isWindowVisible(): boolean;
@@ -49,6 +51,13 @@ export function createDesktopTray(
     tray.setContextMenu(
       Menu.buildFromTemplate([
         visibilityAction,
+        {
+          click: () => {
+            actions.centerWindow();
+            refresh();
+          },
+          label: "窗口居中",
+        },
         {
           checked: actions.isClickThrough(),
           click: (menuItem) => {

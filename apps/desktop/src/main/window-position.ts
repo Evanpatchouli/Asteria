@@ -25,6 +25,22 @@ export interface DisplayWorkArea {
 }
 
 /**
+ * Calculates a position centered within a work area.
+ *
+ * If the window is larger than the work area on either axis, that axis is
+ * aligned to the work area's starting edge.
+ */
+export function calculateCenteredPosition(
+  workArea: WorkArea,
+  windowSize: WindowSize,
+): WindowPosition {
+  return {
+    x: calculateCenteredAxis(workArea.x, workArea.width, windowSize.width),
+    y: calculateCenteredAxis(workArea.y, workArea.height, windowSize.height),
+  };
+}
+
+/**
  * Calculates a position aligned to the bottom-right corner of a work area.
  *
  * If the window is larger than the work area on either axis, that axis is
@@ -138,6 +154,18 @@ function calculateBottomRightAxis(
     workAreaStart,
     workAreaStart + workAreaLength - windowLength - margin,
   );
+}
+
+function calculateCenteredAxis(
+  workAreaStart: number,
+  workAreaLength: number,
+  windowLength: number,
+): number {
+  if (windowLength >= workAreaLength) {
+    return workAreaStart;
+  }
+
+  return workAreaStart + Math.round((workAreaLength - windowLength) / 2);
 }
 
 function findDisplayWithLargestOverlap(

@@ -7,11 +7,14 @@
   "scripts": {
     "build": "electron-vite build",
     "dev": "electron-vite dev --watch",
+    "predev": "pnpm --filter @asteria/renderer... build",
+    "presmoke": "pnpm --filter @asteria/renderer... build",
     "smoke": "electron-vite build && electron . --smoke-test",
     "start": "electron-vite preview",
     "typecheck": "tsc --project tsconfig.config.json --noEmit && tsc --project tsconfig.main.json --noEmit && tsc --project tsconfig.preload.json --noEmit && tsc --project tsconfig.renderer.json --noEmit"
   },
   "dependencies": {
+    "@asteria/renderer": "workspace:*",
     "@asteria/shared": "workspace:*",
     "react": "19.2.8",
     "react-dom": "19.2.8"
