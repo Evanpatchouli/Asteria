@@ -13,7 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
-    "test": "vitest run",
+    "test": "pnpm build && vitest run",
     "typecheck": "pnpm --recursive --if-present typecheck"
   },
   "devDependencies": {

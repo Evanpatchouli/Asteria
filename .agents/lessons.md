@@ -11,3 +11,7 @@
 ## TypeScript 项目拆分
 
 测试文件需要进入类型检查项目，但不应进入发布产物。使用 `tsconfig.json` 覆盖源码和测试，再用独立 `tsconfig.build.json` 排除测试，比让 ESLint 使用默认项目更稳定。
+
+## Workspace 可重复验证
+
+workspace 包的 `types` 入口应指向源码，避免全新克隆在首次构建前无法执行类型检查。运行时测试若通过包导出读取 `dist`，测试脚本应先构建 workspace，不能依赖本地残留产物。

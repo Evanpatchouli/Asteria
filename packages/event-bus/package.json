@@ -1,5 +1,5 @@
 {
-  "name": "@asteria/shared",
+  "name": "@asteria/event-bus",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -17,6 +17,6 @@
     "typecheck": "tsc --project tsconfig.json --noEmit"
   },
   "dependencies": {
-    "zod": "4.4.3"
+    "@asteria/shared": "workspace:*"
   }
 }
