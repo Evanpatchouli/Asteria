@@ -37,6 +37,24 @@
         |
     Renderer Engine
 
+开发环境额外提供独立诊断窗口：
+
+    Debug Renderer
+
+        |
+        | Debug Preload
+
+        v
+
+    Main Debug Adapter / Telemetry Hub
+
+        |
+        | 标准 Agent Event
+
+        v
+
+    Desktop Renderer Event Bus
+
 ## 3. Main Process 职责
 
 负责：
@@ -48,6 +66,7 @@
 -   全局快捷键
 -   文件系统
 -   原生 API
+-   开发环境调试窗口和结构化遥测中转
 
 ## 4. Renderer 职责
 
@@ -57,8 +76,23 @@
 -   动画循环
 -   用户界面
 -   状态展示
+-   Event Bus、Pet Runtime 和 PixiJS 的唯一组合根
 
-## 5. Preload 职责
+Desktop Renderer 不把 Runtime 或 Renderer 实例暴露给调试窗口。
+
+## 5. 调试 Renderer 职责
+
+仅在 `pnpm dev` 环境启用，负责：
+
+-   发送标准模拟 Agent Event 意图
+-   展示 Main 提供的只读 Runtime 快照
+-   展示最多 `200` 条内存结构化日志
+-   提供中文和英文界面
+-   渲染无边框标题栏，并通过窄 IPC 请求最小化或关闭自身
+
+调试 Renderer 不创建第二套 Event Bus 或 Pet Runtime，也不能直接控制 PixiJS。
+
+## 6. Preload 职责
 
 负责：
 
@@ -72,17 +106,21 @@ Preload 不暴露：
 -   Node.js API
 -   任意 Channel 的 `send`、`invoke` 或 `on`
 
-## 6. 安全配置
+## 7. 安全配置
 
-Renderer Window 必须启用：
+两个 Renderer Window 均保持：
 
 -   `contextIsolation: true`
 -   `nodeIntegration: false`
 -   `sandbox: true`
 
-沙箱 Preload 必须完整打包为单个 CommonJS 文件。
+沙箱 Preload 必须完整打包为单个 CommonJS 文件。Desktop 与 Debug Window 共用该 Bundle，通过 Main 注入的窗口参数只暴露对应的窄 API。Debug API 不会暴露给桌宠窗口。
 
-## 7. 原则
+生产环境不注册 Debug IPC，不显示托盘入口，也不构建 Debug Renderer HTML。
+
+Debug Window 使用 `frame: false`。Renderer Header 通过 CSS `app-region: drag` 提供拖动区域，语言切换和窗口控制使用 `app-region: no-drag`；Renderer 不获得原生窗口对象。
+
+## 8. 原则
 
 禁止：
 
@@ -90,4 +128,4 @@ Renderer Window 必须启用：
 -   Main 参与动画逻辑
 -   Agent 逻辑耦合窗口代码
 
-窗口拖动使用 Renderer 的 CSS `app-region: drag` 声明，但坐标恢复、持久化、显示、隐藏和鼠标穿透均由 Main Process 管理。
+窗口拖动使用 Renderer 的 CSS `app-region: drag` 声明，但坐标恢复、持久化、显示、隐藏、最小化、关闭和鼠标穿透均由 Main Process 管理。

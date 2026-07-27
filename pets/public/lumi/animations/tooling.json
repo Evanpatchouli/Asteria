@@ -1,0 +1,145 @@
+{
+  "animations": {
+    "tooling": [
+      "tooling-0",
+      "tooling-1",
+      "tooling-2",
+      "tooling-3",
+      "tooling-4",
+      "tooling-5"
+    ]
+  },
+  "frames": {
+    "tooling-0": {
+      "frame": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 256,
+        "w": 256
+      },
+      "spriteSourceSize": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "tooling-1": {
+      "frame": {
+        "h": 256,
+        "w": 256,
+        "x": 256,
+        "y": 0
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 256,
+        "w": 256
+      },
+      "spriteSourceSize": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "tooling-2": {
+      "frame": {
+        "h": 256,
+        "w": 256,
+        "x": 512,
+        "y": 0
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 256,
+        "w": 256
+      },
+      "spriteSourceSize": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "tooling-3": {
+      "frame": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 256
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 256,
+        "w": 256
+      },
+      "spriteSourceSize": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "tooling-4": {
+      "frame": {
+        "h": 256,
+        "w": 256,
+        "x": 256,
+        "y": 256
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 256,
+        "w": 256
+      },
+      "spriteSourceSize": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "tooling-5": {
+      "frame": {
+        "h": 256,
+        "w": 256,
+        "x": 512,
+        "y": 256
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 256,
+        "w": 256
+      },
+      "spriteSourceSize": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    }
+  },
+  "meta": {
+    "app": "Asteria Lumi asset builder",
+    "format": "RGBA8888",
+    "image": "tooling.png",
+    "scale": "1",
+    "size": {
+      "h": 512,
+      "w": 768
+    },
+    "version": "1.0"
+  }
+}

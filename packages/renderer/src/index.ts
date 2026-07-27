@@ -1,7 +1,8 @@
 export {
-  PLACEHOLDER_STATE_ACTIONS,
-  type PlaceholderAction,
-} from "./placeholder-actions.js";
+  loadPixiPetPackage,
+  type LoadedPixiAnimation,
+  type LoadedPixiPetPackage,
+} from "./pixi-pet-package-loader.js";
 export {
   PixiPetRenderer,
   type PixiPetRendererOptions,

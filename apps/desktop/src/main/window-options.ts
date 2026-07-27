@@ -14,6 +14,7 @@ export const DESKTOP_WINDOW_SIZE = {
 export function createDesktopWindowOptions(
   preloadPath: string,
   position?: Point,
+  debugTelemetryEnabled = false,
 ): BrowserWindowConstructorOptions {
   return {
     ...DESKTOP_WINDOW_SIZE,
@@ -27,6 +28,9 @@ export function createDesktopWindowOptions(
     show: false,
     transparent: true,
     webPreferences: {
+      ...(debugTelemetryEnabled
+        ? { additionalArguments: ["--asteria-debug-telemetry"] }
+        : {}),
       contextIsolation: true,
       nodeIntegration: false,
       preload: preloadPath,

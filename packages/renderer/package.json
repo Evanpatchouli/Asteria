@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@asteria/pet-runtime": "workspace:*",
+    "@asteria/shared": "workspace:*",
     "pixi.js": "8.19.0"
   }
 }

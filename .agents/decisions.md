@@ -49,3 +49,26 @@
 - Renderer 销毁必须同时释放 Ticker、场景、纹理、Canvas 和 GPU Context。
 - 初始化失败时释放当前 Application；后续重试创建新实例，不复用可能被污染的 PixiJS Application。
 - Desktop 开发和冒烟命令在启动前按 workspace 拓扑构建运行时依赖。
+
+## 2026-07-28：开发环境调试闭环
+
+- Desktop Renderer 是 Event Bus、Pet Runtime 和 PixiJS 的唯一组合根。
+- 调试面板作为开发环境 Agent Adapter，只发送标准事件意图，不直接访问 Runtime 或 Renderer。
+- 模拟事件由 Main 构造完整协议数据并复用正式 `agent:event` IPC。
+- Pet Runtime 通过只读快照订阅暴露可观察性，外部仍只能用 `dispatch` 驱动状态。
+- Main 使用最多 `200` 条的内存 Telemetry Hub 中转日志和 Runtime 快照，不持久化诊断数据。
+- Desktop 与 Debug Window 共用单个沙箱 Preload Bundle，通过窗口参数进行 API 能力隔离。
+- Debug IPC、托盘入口和 Debug Renderer HTML 仅在 `pnpm dev` 环境启用。
+- 调试 UI 支持中文和英文，协议标识保持英文。
+- Debug Window 使用无边框自定义标题栏；Renderer 仅通过经过 sender 与主 Frame 校验的窄 IPC 请求最小化或关闭自身。
+
+## 2026-07-28：Lumi 六状态 Sprite 资源
+
+- 默认桌宠使用原创角色 Lumi，不采用 Codex `hatch-pet` 图集协议。
+- Manifest 升级为 `1.1`，`tooling` 是必需状态，`agent.tool_call` 不再复用 `coding`。
+- `tooling` 与 `coding` 同优先级；`happy` 与 `error` 各自使用可配置的 `2.4s` 瞬态时长。
+- `pets/lumi/reference` 与 `pets/lumi/source` 保存视觉基准和可再构建源图，`pets/public/lumi` 是发布资源。
+- 每个动作使用独立的标准 PixiJS Sprite Sheet，固定 `256×256` 未裁切帧。
+- `AnimatedSprite` 禁用共享自动更新，由应用私有 Ticker 显式推进。
+- `yeah!` 和 `ERROR` 由资产构建脚本以仓库内位图字形确定性写入，不依赖生成模型拼写。
+- Renderer 对 Manifest、图集或未知动作错误采用明确失败，不保留程序化占位降级路径。

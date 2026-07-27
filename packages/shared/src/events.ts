@@ -1,23 +1,22 @@
 import { z } from "zod";
 
-export const AGENT_EVENT_PROTOCOL_VERSION = "1.0" as const;
+import {
+  AGENT_EVENT_PROTOCOL_VERSION,
+  AGENT_EVENT_SOURCES,
+  AGENT_EVENT_TYPES,
+} from "./event-contract.js";
+import type { AgentEvent } from "./event-contract.js";
 
-export const AGENT_EVENT_SOURCES = [
-  "claude",
-  "codex",
-  "mcp",
-  "game",
-  "custom",
-] as const;
-
-export const AGENT_EVENT_TYPES = [
-  "agent.idle",
-  "agent.thinking",
-  "agent.coding",
-  "agent.tool_call",
-  "agent.success",
-  "agent.error",
-] as const;
+export {
+  AGENT_EVENT_PROTOCOL_VERSION,
+  AGENT_EVENT_SOURCES,
+  AGENT_EVENT_TYPES,
+} from "./event-contract.js";
+export type {
+  AgentEvent,
+  AgentEventSource,
+  AgentEventType,
+} from "./event-contract.js";
 
 export const agentEventSchema = z
   .object({
@@ -29,10 +28,6 @@ export const agentEventSchema = z
     payload: z.unknown().optional(),
   })
   .strict();
-
-export type AgentEventSource = (typeof AGENT_EVENT_SOURCES)[number];
-export type AgentEventType = (typeof AGENT_EVENT_TYPES)[number];
-export type AgentEvent = z.infer<typeof agentEventSchema>;
 
 /**
  * Validates unknown input at an integration boundary and returns a typed event.

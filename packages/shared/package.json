@@ -11,6 +11,14 @@
     "./ipc": {
       "types": "./src/ipc.ts",
       "import": "./dist/ipc.js"
+    },
+    "./event-contract": {
+      "types": "./src/event-contract.ts",
+      "import": "./dist/event-contract.js"
+    },
+    "./debug-contract": {
+      "types": "./src/debug-contract.ts",
+      "import": "./dist/debug-contract.js"
     }
   },
   "files": [

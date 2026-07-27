@@ -215,16 +215,21 @@ interface PetRendererPort {
 
 ## TASK-030 状态机
 
-
 状态：
+
+DONE
+
+定义：
 
 ```ts
 type PetState =
  | "idle"
  | "thinking"
  | "coding"
- | "success"
- | "error";
+ | "waiting"
+ | "happy"
+ | "error"
+ | "sleep";
 ```
 
 
@@ -232,6 +237,9 @@ type PetState =
 
 ## TASK-031 Action System
 
+状态：
+
+DONE
 
 流程：
 
@@ -250,9 +258,12 @@ Animation
 
 动作：
 
+- idle
 - typing
 - thinking
+- tooling
 - celebrate
+- error
 - sleep
 
 
@@ -260,19 +271,23 @@ Animation
 
 ## TASK-032 Resource Loader
 
+状态：
+
+DONE
+
 
 支持：
 
 ```
 pets/
 
-└── default/
+└── public/
 
-    ├── pet.json
+    └── lumi/
 
-    ├── animations/
+        ├── pet.json
 
-    └── textures/
+        └── animations/
 ```
 
 

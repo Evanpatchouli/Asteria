@@ -1,0 +1,145 @@
+{
+  "animations": {
+    "thinking": [
+      "thinking-0",
+      "thinking-1",
+      "thinking-2",
+      "thinking-3",
+      "thinking-4",
+      "thinking-5"
+    ]
+  },
+  "frames": {
+    "thinking-0": {
+      "frame": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 256,
+        "w": 256
+      },
+      "spriteSourceSize": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "thinking-1": {
+      "frame": {
+        "h": 256,
+        "w": 256,
+        "x": 256,
+        "y": 0
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 256,
+        "w": 256
+      },
+      "spriteSourceSize": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "thinking-2": {
+      "frame": {
+        "h": 256,
+        "w": 256,
+        "x": 512,
+        "y": 0
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 256,
+        "w": 256
+      },
+      "spriteSourceSize": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "thinking-3": {
+      "frame": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 256
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 256,
+        "w": 256
+      },
+      "spriteSourceSize": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "thinking-4": {
+      "frame": {
+        "h": 256,
+        "w": 256,
+        "x": 256,
+        "y": 256
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 256,
+        "w": 256
+      },
+      "spriteSourceSize": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    },
+    "thinking-5": {
+      "frame": {
+        "h": 256,
+        "w": 256,
+        "x": 512,
+        "y": 256
+      },
+      "rotated": false,
+      "sourceSize": {
+        "h": 256,
+        "w": 256
+      },
+      "spriteSourceSize": {
+        "h": 256,
+        "w": 256,
+        "x": 0,
+        "y": 0
+      },
+      "trimmed": false
+    }
+  },
+  "meta": {
+    "app": "Asteria Lumi asset builder",
+    "format": "RGBA8888",
+    "image": "thinking.png",
+    "scale": "1",
+    "size": {
+      "h": 512,
+      "w": 768
+    },
+    "version": "1.0"
+  }
+}

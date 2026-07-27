@@ -24,9 +24,10 @@ export function createMainWindow(
   preloadPath: string,
   rendererTarget: RendererTarget,
   position?: Point,
+  debugTelemetryEnabled = false,
 ): MainWindowHandle {
   const window = new BrowserWindow(
-    createDesktopWindowOptions(preloadPath, position),
+    createDesktopWindowOptions(preloadPath, position, debugTelemetryEnabled),
   );
 
   window.once("ready-to-show", () => {

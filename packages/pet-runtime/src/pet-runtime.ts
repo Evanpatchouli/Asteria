@@ -10,18 +10,78 @@ import type {
   CancelScheduledTask,
   RuntimeScheduler,
 } from "./runtime-scheduler.js";
-import { PetStateMachine } from "./state-machine.js";
+import { PetStateMachine, type StateTransition } from "./state-machine.js";
 
-const TRANSIENT_STATES = new Set<PetState>(["error", "happy"]);
+const TRANSIENT_STATES = [
+  "happy",
+  "error",
+] as const satisfies readonly PetState[];
 
-export interface PetRuntimeOptions {
-  readonly renderer: PetRendererPort;
-  readonly scheduler: RuntimeScheduler;
-  readonly stateActions: PetStateActionMap;
-  readonly transientStateDurationMs?: number;
+/**
+ * Logical states that automatically return to idle after their action finishes.
+ */
+export type TransientPetState = (typeof TRANSIENT_STATES)[number];
+
+/**
+ * Per-state fallback durations for transient pet states.
+ */
+export type TransientStateDurations = Readonly<
+  Record<TransientPetState, number>
+>;
+
+const DEFAULT_TRANSIENT_STATE_DURATIONS = {
+  happy: 2_400,
+  error: 2_400,
+} as const satisfies TransientStateDurations;
+
+const TRANSIENT_STATE_SET = new Set<PetState>(TRANSIENT_STATES);
+
+function isTransientPetState(state: PetState): state is TransientPetState {
+  return TRANSIENT_STATE_SET.has(state);
 }
 
-type RuntimeStatus = "created" | "destroyed" | "initializing" | "ready";
+/**
+ * Dependencies and behavior settings required to construct a Pet Runtime.
+ */
+export interface PetRuntimeOptions {
+  /** Renderer controlled exclusively by the Runtime. */
+  readonly renderer: PetRendererPort;
+  /** Scheduler used for transient-state fallback tasks. */
+  readonly scheduler: RuntimeScheduler;
+  /** Maps logical states to renderer action names. */
+  readonly stateActions: PetStateActionMap;
+  /** Per-state durations before transient states return to idle. */
+  readonly transientStateDurationsMs?: Readonly<
+    Partial<TransientStateDurations>
+  >;
+}
+
+/**
+ * Lifecycle status exposed by Pet Runtime snapshots.
+ */
+export type RuntimeStatus = "created" | "destroyed" | "initializing" | "ready";
+
+/**
+ * Immutable, point-in-time view of Pet Runtime state.
+ */
+export interface PetRuntimeSnapshot {
+  /** Current Runtime lifecycle status. */
+  readonly status: RuntimeStatus;
+  /** Current logical pet state. */
+  readonly state: PetState;
+  /** Renderer action currently playing, or `null` when none is active. */
+  readonly action: string | null;
+}
+
+/**
+ * Receives read-only Pet Runtime snapshots.
+ */
+export type PetRuntimeObserver = (snapshot: PetRuntimeSnapshot) => void;
+
+/**
+ * Stops a Pet Runtime observer from receiving future snapshots.
+ */
+export type UnsubscribePetRuntimeObserver = () => void;
 
 /**
  * Converts Agent Events into state transitions and renderer actions.
@@ -31,23 +91,32 @@ export class PetRuntime {
   readonly #scheduler: RuntimeScheduler;
   readonly #stateActions: PetStateActionMap;
   readonly #stateMachine = new PetStateMachine();
-  readonly #transientStateDurationMs: number;
+  readonly #transientStateDurationsMs: TransientStateDurations;
+  readonly #observers = new Set<PetRuntimeObserver>();
   #cancelFallback: CancelScheduledTask | undefined;
   #initialization: Promise<void> | undefined;
   #status: RuntimeStatus = "created";
 
   public constructor(options: PetRuntimeOptions) {
-    if (
-      options.transientStateDurationMs !== undefined &&
-      options.transientStateDurationMs < 0
-    ) {
-      throw new RangeError("transientStateDurationMs must not be negative.");
+    const transientStateDurationsMs: TransientStateDurations = {
+      ...DEFAULT_TRANSIENT_STATE_DURATIONS,
+      ...options.transientStateDurationsMs,
+    };
+
+    for (const [state, durationMs] of Object.entries(
+      transientStateDurationsMs,
+    )) {
+      if (!Number.isFinite(durationMs) || durationMs < 0) {
+        throw new RangeError(
+          `transientStateDurationsMs.${state} must be a finite, non-negative number.`,
+        );
+      }
     }
 
     this.#renderer = options.renderer;
     this.#scheduler = options.scheduler;
     this.#stateActions = options.stateActions;
-    this.#transientStateDurationMs = options.transientStateDurationMs ?? 1_200;
+    this.#transientStateDurationsMs = transientStateDurationsMs;
   }
 
   /**
@@ -63,6 +132,7 @@ export class PetRuntime {
     }
 
     this.#status = "initializing";
+    this.#notifyObservers();
     this.#initialization = this.#renderer
       .initialize()
       .then(() => {
@@ -72,11 +142,13 @@ export class PetRuntime {
 
         this.#status = "ready";
         this.#renderer.play(this.#actionFor(this.#stateMachine.current()));
+        this.#notifyObservers();
       })
       .catch((error: unknown) => {
         if (this.#status !== "destroyed") {
           this.#status = "created";
           this.#initialization = undefined;
+          this.#notifyObservers();
         }
 
         throw error;
@@ -93,9 +165,38 @@ export class PetRuntime {
   }
 
   /**
-   * Converts and applies a validated Agent Event.
+   * Returns an immutable snapshot of the current Runtime state.
    */
-  public dispatch(event: AgentEvent): void {
+  public snapshot(): PetRuntimeSnapshot {
+    const state = this.#stateMachine.current();
+
+    return Object.freeze({
+      status: this.#status,
+      state,
+      action: this.#status === "ready" ? this.#actionFor(state) : null,
+    });
+  }
+
+  /**
+   * Observes Runtime snapshots and immediately receives the current snapshot.
+   *
+   * Observer failures are isolated from Runtime behavior.
+   */
+  public subscribe(
+    observer: PetRuntimeObserver,
+  ): UnsubscribePetRuntimeObserver {
+    this.#observers.add(observer);
+    this.#notifyObserver(observer);
+
+    return () => {
+      this.#observers.delete(observer);
+    };
+  }
+
+  /**
+   * Converts and applies a validated Agent Event, returning its transition.
+   */
+  public dispatch(event: AgentEvent): StateTransition {
     this.#assertReady();
 
     const nextState = mapAgentEventToPetState(event.type);
@@ -105,21 +206,24 @@ export class PetRuntime {
     if (transition.status === "unchanged") {
       if (
         transition.reason === "same-state" &&
-        TRANSIENT_STATES.has(transition.state)
+        isTransientPetState(transition.state)
       ) {
-        this.#scheduleFallback();
+        this.#scheduleFallback(transition.state);
       }
 
-      return;
+      return transition;
     }
 
     this.#cancelScheduledFallback();
     this.#renderer.stop(this.#actionFor(transition.from));
     this.#renderer.play(this.#actionFor(transition.to));
+    this.#notifyObservers();
 
-    if (TRANSIENT_STATES.has(transition.to)) {
-      this.#scheduleFallback();
+    if (isTransientPetState(transition.to)) {
+      this.#scheduleFallback(transition.to);
     }
+
+    return transition;
   }
 
   /**
@@ -139,6 +243,8 @@ export class PetRuntime {
     }
 
     this.#renderer.destroy();
+    this.#notifyObservers();
+    this.#observers.clear();
   }
 
   #actionFor(state: PetState): string {
@@ -155,10 +261,10 @@ export class PetRuntime {
     }
   }
 
-  #scheduleFallback(): void {
+  #scheduleFallback(state: TransientPetState): void {
     this.#cancelScheduledFallback();
     this.#cancelFallback = this.#scheduler.schedule(
-      this.#transientStateDurationMs,
+      this.#transientStateDurationsMs[state],
       () => {
         this.#cancelFallback = undefined;
 
@@ -173,6 +279,7 @@ export class PetRuntime {
         if (transition.status === "changed") {
           this.#renderer.stop(this.#actionFor(transition.from));
           this.#renderer.play(this.#actionFor(transition.to));
+          this.#notifyObservers();
         }
       },
     );
@@ -181,5 +288,19 @@ export class PetRuntime {
   #cancelScheduledFallback(): void {
     this.#cancelFallback?.();
     this.#cancelFallback = undefined;
+  }
+
+  #notifyObservers(): void {
+    for (const observer of this.#observers) {
+      this.#notifyObserver(observer);
+    }
+  }
+
+  #notifyObserver(observer: PetRuntimeObserver): void {
+    try {
+      observer(this.snapshot());
+    } catch {
+      // Observability is a side channel and must not alter Runtime behavior.
+    }
   }
 }

@@ -8,6 +8,8 @@ import {
 export interface DesktopTrayActions {
   /** Centers and reveals the desktop window. */
   centerWindow(): void;
+  /** Opens the development diagnostics window when available. */
+  openDebugPanel?: () => void;
   hideWindow(): void;
   isClickThrough(): boolean;
   isWindowVisible(): boolean;
@@ -48,36 +50,51 @@ export function createDesktopTray(
             label: "显示",
           };
 
-    tray.setContextMenu(
-      Menu.buildFromTemplate([
-        visibilityAction,
-        {
-          click: () => {
-            actions.centerWindow();
-            refresh();
-          },
-          label: "窗口居中",
+    const template: MenuItemConstructorOptions[] = [
+      visibilityAction,
+      {
+        click: () => {
+          actions.centerWindow();
+          refresh();
         },
-        {
-          checked: actions.isClickThrough(),
-          click: (menuItem) => {
-            actions.setClickThrough(menuItem.checked);
-            refresh();
-          },
-          label: "鼠标穿透",
-          type: "checkbox",
+        label: "窗口居中",
+      },
+      {
+        checked: actions.isClickThrough(),
+        click: (menuItem) => {
+          actions.setClickThrough(menuItem.checked);
+          refresh();
         },
+        label: "鼠标穿透",
+        type: "checkbox",
+      },
+    ];
+
+    if (actions.openDebugPanel) {
+      template.push(
         {
           type: "separator",
         },
         {
-          click: () => {
-            actions.quitApplication();
-          },
-          label: "退出",
+          click: actions.openDebugPanel,
+          label: "调试面板",
         },
-      ]),
+      );
+    }
+
+    template.push(
+      {
+        type: "separator",
+      },
+      {
+        click: () => {
+          actions.quitApplication();
+        },
+        label: "退出",
+      },
     );
+
+    tray.setContextMenu(Menu.buildFromTemplate(template));
   };
 
   tray.setToolTip("Asteria");

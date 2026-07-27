@@ -29,6 +29,21 @@ describe("PetStateMachine", () => {
     expect(machine.current()).toBe("error");
   });
 
+  it("treats coding and tooling as equal-priority interruptible states", () => {
+    const machine = new PetStateMachine("coding");
+
+    expect(machine.transition("tooling")).toEqual({
+      status: "changed",
+      from: "coding",
+      to: "tooling",
+    });
+    expect(machine.transition("coding")).toEqual({
+      status: "changed",
+      from: "tooling",
+      to: "coding",
+    });
+  });
+
   it("supports explicit forced resets", () => {
     const machine = new PetStateMachine("error");
 

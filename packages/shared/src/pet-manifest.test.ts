@@ -15,6 +15,7 @@ const validManifest = {
     idle: "idle",
     thinking: "thinking",
     coding: "coding",
+    tooling: "tooling",
     happy: "happy",
     error: "error",
   },
@@ -26,6 +27,11 @@ const validManifest = {
       frameRate: 8,
     },
     coding: { source: "animations/coding.json", loop: true, frameRate: 12 },
+    tooling: {
+      source: "animations/tooling.json",
+      loop: true,
+      frameRate: 10,
+    },
     happy: { source: "animations/happy.json", loop: false, frameRate: 12 },
     error: { source: "animations/error.json", loop: false, frameRate: 8 },
   },
@@ -46,6 +52,30 @@ describe("parsePetManifest", () => {
         },
       }),
     ).toThrow(/unknown animation/);
+  });
+
+  it("rejects the obsolete 1.0 protocol", () => {
+    expect(() =>
+      parsePetManifest({
+        ...validManifest,
+        protocolVersion: "1.0",
+      }),
+    ).toThrow();
+  });
+
+  it("requires a tooling state animation", () => {
+    expect(() =>
+      parsePetManifest({
+        ...validManifest,
+        states: {
+          coding: validManifest.states.coding,
+          error: validManifest.states.error,
+          happy: validManifest.states.happy,
+          idle: validManifest.states.idle,
+          thinking: validManifest.states.thinking,
+        },
+      }),
+    ).toThrow();
   });
 
   it("rejects a renderer outside the Phase 1 scope", () => {

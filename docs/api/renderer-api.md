@@ -37,20 +37,13 @@ interface PetRendererPort {
 
 表达式等扩展能力不进入 Phase 1 Runtime Port。
 
-当前 `@asteria/renderer` 包提供 `PixiPetRenderer`，结构上实现
-`PetRendererPort`。Phase 1 占位动作映射为：
+当前 `@asteria/renderer` 包提供：
 
-``` ts
-const PLACEHOLDER_STATE_ACTIONS = {
-  idle: "idle",
-  thinking: "thinking",
-  coding: "typing",
-  happy: "celebrate",
-  error: "error"
-};
-```
+-   `loadPixiPetPackage(manifestUrl)`：加载并校验 Manifest 1.1、图集 JSON 与纹理
+-   `PixiPetRenderer`：消费已加载资源并实现 `PetRendererPort`
 
-未识别的动作使用默认呼吸表现，不在 Renderer 内解释 Agent Event 或宠物状态。
+状态动作映射来自已校验 Manifest，并由 Desktop 组合根交给 Pet Runtime。
+Renderer 不解释 Agent Event 或宠物状态；未在资源包注册的动作会明确失败。
 
 ## 3. 生命周期
 
@@ -58,7 +51,7 @@ const PLACEHOLDER_STATE_ACTIONS = {
      ↓
     initialize
      ↓
-    load resource
+    load and validate package
      ↓
     render loop
      ↓
@@ -85,5 +78,7 @@ const PLACEHOLDER_STATE_ACTIONS = {
 
 -   透明 WebGL Canvas
 -   应用私有 Ticker，最高 `60 FPS`
+-   `AnimatedSprite.autoUpdate = false`，由私有 Ticker 显式推进
+-   角色帧默认占视口短边 `36%`，保留桌宠所需的小尺寸和透明活动空间
 -   独立于 React 的逐帧更新
--   销毁时释放 Ticker、场景、纹理、Canvas 和 GPU Context
+-   销毁时释放 Ticker、场景、图集纹理、Canvas 和 GPU Context

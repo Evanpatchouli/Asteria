@@ -62,8 +62,9 @@ React 不负责：
 -   每帧更新
 -   Sprite 控制
 
-Desktop Renderer 入口只负责组合和生命周期启动。当前周期在 Pet Runtime
-接线前启动默认 `idle` 占位动作；后续由 Pet Runtime 接管 `play` 和 `stop`。
+Desktop Renderer 入口只负责组合和生命周期启动。它先加载并校验 Lumi
+Manifest，再把 Manifest 状态动作映射交给 Pet Runtime；Runtime 通过 `play` 和
+`stop` 独占动画控制权。
 
 ## 5. Renderer 实现
 
@@ -72,7 +73,9 @@ Desktop Renderer 入口只负责组合和生命周期启动。当前周期在 Pe
 -   `packages/renderer`
 -   `PixiPetRenderer`
 -   透明 Canvas
--   程序化占位 Sprite
+-   Manifest 1.1 资源加载器
+-   PixiJS `Spritesheet` 与 `AnimatedSprite`
+-   Lumi 六状态动画图集
 -   `PetRendererPort` 适配
 
 未来支持：

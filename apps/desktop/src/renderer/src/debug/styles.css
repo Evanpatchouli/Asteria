@@ -1,0 +1,380 @@
+:root {
+  color: #edf1f4;
+  background: #111820;
+  font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#debug-root {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: #111820;
+}
+
+button {
+  color: inherit;
+  font: inherit;
+}
+
+.debug-console {
+  display: grid;
+  height: 100%;
+  grid-template-rows: 60px minmax(300px, 46%) minmax(0, 1fr);
+  background: #111820;
+}
+
+.debug-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 28px;
+  border-bottom: 1px solid #3b4650;
+  app-region: drag;
+  user-select: none;
+}
+
+.debug-header h1,
+.debug-console h2 {
+  margin: 0;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.debug-header h1 {
+  font-size: 21px;
+}
+
+.debug-console h2 {
+  font-size: 18px;
+}
+
+.header-controls,
+.language-switch,
+.connection-status,
+.window-controls {
+  display: flex;
+  align-items: center;
+}
+
+.header-controls {
+  align-self: stretch;
+  gap: 28px;
+}
+
+.language-switch,
+.connection-status,
+.window-controls {
+  app-region: no-drag;
+}
+
+.language-switch {
+  gap: 20px;
+}
+
+.language-switch button {
+  position: relative;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: #a8b1b9;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.language-switch button::after {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  left: 0;
+  height: 2px;
+  background: #8ee8d4;
+  content: "";
+  opacity: 0;
+  transform: scaleX(0.5);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.language-switch button:hover,
+.language-switch button.is-selected {
+  color: #8ee8d4;
+}
+
+.language-switch button.is-selected::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.connection-status {
+  gap: 10px;
+  color: #f07f7f;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+}
+
+.connection-status span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.connection-status.is-connected {
+  color: #69d896;
+}
+
+.window-controls {
+  align-self: stretch;
+  margin-left: -8px;
+}
+
+.window-control {
+  display: grid;
+  width: 48px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #a8b1b9;
+  cursor: pointer;
+  place-items: center;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.window-control svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: square;
+  stroke-width: 1.25;
+}
+
+.window-control:hover {
+  background: #27313a;
+  color: #edf1f4;
+}
+
+.window-control-close:hover {
+  background: #c94f57;
+  color: #ffffff;
+}
+
+.debug-workspace {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: minmax(330px, 34%) 1fr;
+  border-bottom: 1px solid #3b4650;
+}
+
+.runtime-overview,
+.event-simulator {
+  min-width: 0;
+  padding: 28px;
+}
+
+.runtime-overview {
+  border-right: 1px solid #3b4650;
+}
+
+.runtime-overview dl {
+  display: grid;
+  gap: 17px;
+  margin: 28px 0 0;
+}
+
+.runtime-row {
+  display: grid;
+  align-items: baseline;
+  grid-template-columns: minmax(150px, 1fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.runtime-row dt {
+  color: #d6dce1;
+  font-size: 15px;
+}
+
+.runtime-row dd {
+  margin: 0;
+  overflow: hidden;
+  color: #8ee8d4;
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-button-grid {
+  display: grid;
+  margin-top: 86px;
+  grid-template-columns: repeat(6, minmax(88px, 1fr));
+  gap: 12px;
+}
+
+.event-button-grid button {
+  min-height: 88px;
+  padding: 12px;
+  border: 1px solid #79838c;
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 15px;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.event-button-grid button:hover:not(:disabled),
+.event-button-grid button.is-active {
+  border-color: #8ee8d4;
+  background: rgba(142, 232, 212, 0.08);
+  color: #8ee8d4;
+}
+
+.event-button-grid button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.event-log {
+  display: grid;
+  min-height: 0;
+  padding: 22px 28px 0;
+  grid-template-rows: 40px minmax(0, 1fr);
+}
+
+.section-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+}
+
+.clear-button {
+  min-width: 112px;
+  padding: 8px 16px;
+  border: 1px solid #8ee8d4;
+  border-radius: 3px;
+  background: transparent;
+  color: #8ee8d4;
+  cursor: pointer;
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+}
+
+.clear-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.36;
+}
+
+.log-table {
+  display: grid;
+  min-height: 0;
+  grid-template-rows: 42px minmax(0, 1fr);
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 13px;
+}
+
+.log-row {
+  display: grid;
+  min-width: 0;
+  grid-template-columns:
+    minmax(130px, 0.8fr)
+    minmax(120px, 0.8fr)
+    minmax(170px, 1fr)
+    minmax(280px, 2.3fr);
+}
+
+.log-row > span {
+  min-width: 0;
+  padding: 9px 12px 9px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.log-header {
+  align-items: end;
+  border-bottom: 1px solid #4b5660;
+  color: #bbc3ca;
+}
+
+.log-body {
+  min-height: 0;
+  overflow: auto;
+  scrollbar-color: #53616c transparent;
+  scrollbar-width: thin;
+}
+
+.log-body .log-row {
+  border-bottom: 1px solid #303a43;
+}
+
+.log-stage {
+  color: #8ee8d4;
+}
+
+.log-level-error .log-stage,
+.log-level-error .log-detail {
+  color: #f07f7f;
+}
+
+.log-detail {
+  color: #d8dee3;
+}
+
+.empty-log {
+  margin: 22px 0;
+  color: #7f8a94;
+  font-family: "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+}
+
+button:focus-visible {
+  outline: 2px solid #8ee8d4;
+  outline-offset: 3px;
+}
+
+@media (max-width: 980px) {
+  .debug-console {
+    grid-template-rows: 60px minmax(330px, 48%) minmax(0, 1fr);
+  }
+
+  .debug-workspace {
+    grid-template-columns: 320px 1fr;
+  }
+
+  .event-button-grid {
+    margin-top: 48px;
+    grid-template-columns: repeat(3, minmax(100px, 1fr));
+  }
+
+  .event-button-grid button {
+    min-height: 72px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}

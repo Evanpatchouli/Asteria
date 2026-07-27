@@ -1,8 +1,11 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "electron-vite";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
 
 const CSP_PLACEHOLDER = "__ASTERIA_CSP__";
+const currentDirectory = dirname(fileURLToPath(import.meta.url));
 
 function createContentSecurityPolicyPlugin(isDevelopment: boolean): Plugin {
   const contentSecurityPolicy = [
@@ -24,6 +27,8 @@ function createContentSecurityPolicyPlugin(isDevelopment: boolean): Plugin {
 }
 
 export default defineConfig(({ command }) => {
+  const isDevelopment = command === "serve";
+
   return {
     main: {},
     preload: {
@@ -37,10 +42,20 @@ export default defineConfig(({ command }) => {
       },
     },
     renderer: {
-      plugins: [
-        createContentSecurityPolicyPlugin(command === "serve"),
-        react(),
-      ],
+      publicDir: resolve(currentDirectory, "../../pets/public"),
+      build: {
+        rollupOptions: {
+          input: isDevelopment
+            ? {
+                debug: resolve(currentDirectory, "src/renderer/debug.html"),
+                index: resolve(currentDirectory, "src/renderer/index.html"),
+              }
+            : {
+                index: resolve(currentDirectory, "src/renderer/index.html"),
+              },
+        },
+      },
+      plugins: [createContentSecurityPolicyPlugin(isDevelopment), react()],
     },
   };
 });

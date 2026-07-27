@@ -29,6 +29,12 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@asteria/event-bus':
+        specifier: workspace:*
+        version: link:../../packages/event-bus
+      '@asteria/pet-runtime':
+        specifier: workspace:*
+        version: link:../../packages/pet-runtime
       '@asteria/renderer':
         specifier: workspace:*
         version: link:../../packages/renderer
@@ -81,6 +87,9 @@ importers:
       '@asteria/pet-runtime':
         specifier: workspace:*
         version: link:../pet-runtime
+      '@asteria/shared':
+        specifier: workspace:*
+        version: link:../shared
       pixi.js:
         specifier: 8.19.0
         version: 8.19.0

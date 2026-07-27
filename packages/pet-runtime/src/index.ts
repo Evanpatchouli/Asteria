@@ -1,6 +1,14 @@
 export { mapAgentEventToPetState } from "./agent-event-mapper.js";
 export { PetRuntime } from "./pet-runtime.js";
-export type { PetRuntimeOptions } from "./pet-runtime.js";
+export type {
+  PetRuntimeObserver,
+  PetRuntimeOptions,
+  PetRuntimeSnapshot,
+  RuntimeStatus,
+  TransientPetState,
+  TransientStateDurations,
+  UnsubscribePetRuntimeObserver,
+} from "./pet-runtime.js";
 export type {
   CorePetState,
   PetRendererPort,

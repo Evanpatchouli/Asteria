@@ -13,6 +13,7 @@ const STATE_ACTIONS = {
   idle: "idle",
   thinking: "thinking",
   coding: "typing",
+  tooling: "tooling",
   happy: "celebrate",
   error: "error",
 } as const satisfies PetStateActionMap;
@@ -85,7 +86,10 @@ function createRuntime(
     renderer: renderer.port,
     scheduler,
     stateActions: STATE_ACTIONS,
-    transientStateDurationMs: 500,
+    transientStateDurationsMs: {
+      happy: 500,
+      error: 800,
+    },
   });
 }
 
@@ -129,6 +133,18 @@ describe("PetRuntime", () => {
     ]);
   });
 
+  it("plays a dedicated tooling action for tool calls", async () => {
+    const renderer = createRenderer();
+    const runtime = createRuntime(renderer);
+    await runtime.initialize();
+
+    runtime.dispatch(createEvent("agent.tool_call"));
+
+    expect(runtime.currentState()).toBe("tooling");
+    expect(renderer.stop).toHaveBeenLastCalledWith("idle");
+    expect(renderer.play).toHaveBeenLastCalledWith("tooling");
+  });
+
   it("maps success to happy and falls back to idle", async () => {
     const renderer = createRenderer();
     const scheduler = new ManualScheduler();
@@ -158,6 +174,7 @@ describe("PetRuntime", () => {
 
     expect(runtime.currentState()).toBe("error");
     expect(renderer.play).toHaveBeenLastCalledWith("error");
+    expect(scheduler.tasks.at(-1)?.delayMs).toBe(800);
 
     scheduler.runLatest();
     expect(runtime.currentState()).toBe("idle");
@@ -225,14 +242,47 @@ describe("PetRuntime", () => {
     expect(renderer.destroy).toHaveBeenCalledOnce();
   });
 
-  it("rejects a negative transient state duration", () => {
+  it("uses state-level default transient durations", async () => {
+    const renderer = createRenderer();
+    const scheduler = new ManualScheduler();
+    const runtime = new PetRuntime({
+      renderer: renderer.port,
+      scheduler,
+      stateActions: STATE_ACTIONS,
+    });
+    await runtime.initialize();
+
+    runtime.dispatch(createEvent("agent.success"));
+    expect(scheduler.tasks.at(-1)?.delayMs).toBe(2_400);
+
+    runtime.dispatch(createEvent("agent.error"));
+    expect(scheduler.tasks.at(-1)?.delayMs).toBe(2_400);
+  });
+
+  it("rejects an invalid transient state duration", () => {
     expect(
       () =>
         new PetRuntime({
           renderer: createRenderer().port,
           scheduler: new ManualScheduler(),
           stateActions: STATE_ACTIONS,
-          transientStateDurationMs: -1,
+          transientStateDurationsMs: {
+            error: -1,
+          },
+        }),
+    ).toThrow(RangeError);
+  });
+
+  it("rejects a non-finite transient state duration", () => {
+    expect(
+      () =>
+        new PetRuntime({
+          renderer: createRenderer().port,
+          scheduler: new ManualScheduler(),
+          stateActions: STATE_ACTIONS,
+          transientStateDurationsMs: {
+            happy: Number.POSITIVE_INFINITY,
+          },
         }),
     ).toThrow(RangeError);
   });

@@ -1,33 +1,34 @@
 import type { PetRendererPort } from "@asteria/pet-runtime";
 import "pixi.js/unsafe-eval";
-import { Application, type Sprite, type Ticker } from "pixi.js";
+import { AnimatedSprite, Application, type Ticker } from "pixi.js";
 
-import {
-  PLACEHOLDER_STATE_ACTIONS,
-  type PlaceholderAction,
-} from "./placeholder-actions.js";
-import { createPlaceholderSprite } from "./placeholder-sprite.js";
+import type {
+  LoadedPixiAnimation,
+  LoadedPixiPetPackage,
+} from "./pixi-pet-package-loader.js";
 
 const MAXIMUM_FRAMES_PER_SECOND = 60;
+const VIEWPORT_FILL_RATIO = 0.36;
 
 type RendererStatus = "created" | "destroyed" | "initializing" | "ready";
 
 export interface PixiPetRendererOptions {
   readonly host: HTMLElement;
+  readonly package: LoadedPixiPetPackage;
   readonly resolution?: number;
 }
 
 /**
- * PixiJS implementation of the Pet Runtime's minimum renderer port.
+ * PixiJS AnimatedSprite implementation of the Pet Runtime renderer port.
  */
 export class PixiPetRenderer implements PetRendererPort {
   readonly #host: HTMLElement;
+  readonly #package: LoadedPixiPetPackage;
   readonly #resolution: number;
   #activeAction: string | undefined;
   #application: Application | undefined;
-  #elapsedMilliseconds = 0;
   #initialization: Promise<void> | undefined;
-  #sprite: Sprite | undefined;
+  #sprite: AnimatedSprite | undefined;
   #status: RendererStatus = "created";
 
   public constructor(options: PixiPetRendererOptions) {
@@ -39,6 +40,7 @@ export class PixiPetRenderer implements PetRendererPort {
     }
 
     this.#host = options.host;
+    this.#package = options.package;
     this.#resolution = options.resolution ?? window.devicePixelRatio;
   }
 
@@ -73,7 +75,7 @@ export class PixiPetRenderer implements PetRendererPort {
   }
 
   /**
-   * Starts or replaces the current placeholder action.
+   * Starts or replaces the current Manifest animation.
    */
   public play(action: string): void {
     this.#assertReady();
@@ -82,12 +84,21 @@ export class PixiPetRenderer implements PetRendererPort {
       throw new TypeError("action must not be empty.");
     }
 
-    this.#activeAction = action;
-    this.#elapsedMilliseconds = 0;
+    const animation = this.#animationFor(action);
+    const sprite = this.#sprite;
 
-    if (this.#sprite) {
-      this.#sprite.visible = true;
+    if (!sprite) {
+      throw new Error("PixiPetRenderer animation sprite is unavailable.");
     }
+
+    this.#activeAction = action;
+    sprite.stop();
+    sprite.textures = [...animation.textures];
+    sprite.animationSpeed = animation.frameRate / MAXIMUM_FRAMES_PER_SECOND;
+    sprite.loop = animation.loop;
+    sprite.visible = true;
+    sprite.gotoAndPlay(0);
+    this.#layoutSprite();
   }
 
   /**
@@ -101,30 +112,35 @@ export class PixiPetRenderer implements PetRendererPort {
     }
 
     this.#activeAction = undefined;
-    this.#elapsedMilliseconds = 0;
-    this.#resetSpriteTransform();
 
     if (this.#sprite) {
+      this.#sprite.stop();
       this.#sprite.visible = false;
     }
   }
 
   /**
-   * Stops the ticker and releases the canvas, scene, texture, and GPU context.
+   * Stops animation and releases the canvas, atlases, and GPU context.
    */
   public destroy(): void {
     if (this.#status === "destroyed") {
       return;
     }
 
-    const wasReady = this.#status === "ready";
+    const previousStatus = this.#status;
     const application = this.#application;
 
     this.#status = "destroyed";
     this.#activeAction = undefined;
 
-    if (wasReady && application) {
+    if (previousStatus === "ready" && application) {
       this.#releaseApplication(application, true);
+      this.#package.destroy();
+      return;
+    }
+
+    if (previousStatus === "created") {
+      this.#package.destroy();
     }
   }
 
@@ -147,12 +163,24 @@ export class PixiPetRenderer implements PetRendererPort {
 
       if (this.#status === "destroyed" || this.#application !== application) {
         this.#releaseApplication(application, true);
+        this.#package.destroy();
         return;
       }
 
-      const sprite = createPlaceholderSprite(application.renderer);
+      const initialAnimation = this.#package.animations.values().next().value;
+
+      if (!initialAnimation) {
+        throw new Error("The pet package does not contain any animations.");
+      }
+
+      const sprite = new AnimatedSprite({
+        autoUpdate: false,
+        textures: [...initialAnimation.textures],
+      });
 
       this.#sprite = sprite;
+      sprite.anchor.set(0.5);
+      sprite.eventMode = "none";
       sprite.visible = false;
       application.stage.eventMode = "none";
       application.stage.addChild(sprite);
@@ -161,33 +189,33 @@ export class PixiPetRenderer implements PetRendererPort {
       application.ticker.add(this.#update);
       this.#host.replaceChildren(application.canvas);
       this.#status = "ready";
+      this.#layoutSprite();
       application.start();
     } catch (error: unknown) {
       this.#releaseApplication(application, initialized);
+
+      if (this.#status === "destroyed") {
+        this.#package.destroy();
+      }
+
       throw error;
     }
   }
 
   readonly #update = (ticker: Ticker): void => {
-    const application = this.#application;
-    const sprite = this.#sprite;
+    this.#sprite?.update(ticker);
+    this.#layoutSprite();
+  };
 
-    if (!application || !sprite) {
-      return;
+  #animationFor(action: string): LoadedPixiAnimation {
+    const animation = this.#package.animations.get(action);
+
+    if (!animation) {
+      throw new Error(`Unknown pet animation "${action}".`);
     }
 
-    this.#elapsedMilliseconds += ticker.deltaMS;
-    const elapsedSeconds = this.#elapsedMilliseconds / 1_000;
-    const action = this.#activeAction;
-    const motion = resolvePlaceholderMotion(action, elapsedSeconds);
-
-    sprite.position.set(
-      application.screen.width / 2 + motion.offsetX,
-      application.screen.height / 2 + motion.offsetY,
-    );
-    sprite.rotation = motion.rotation;
-    sprite.scale.set(motion.scaleX, motion.scaleY);
-  };
+    return animation;
+  }
 
   #assertReady(): void {
     if (this.#status !== "ready") {
@@ -195,7 +223,7 @@ export class PixiPetRenderer implements PetRendererPort {
     }
   }
 
-  #resetSpriteTransform(): void {
+  #layoutSprite(): void {
     const application = this.#application;
     const sprite = this.#sprite;
 
@@ -203,12 +231,19 @@ export class PixiPetRenderer implements PetRendererPort {
       return;
     }
 
+    const frameWidth = sprite.texture.orig.width;
+    const frameHeight = sprite.texture.orig.height;
+    const scale =
+      Math.min(
+        application.screen.width / frameWidth,
+        application.screen.height / frameHeight,
+      ) * VIEWPORT_FILL_RATIO;
+
     sprite.position.set(
       application.screen.width / 2,
       application.screen.height / 2,
     );
-    sprite.rotation = 0;
-    sprite.scale.set(1);
+    sprite.scale.set(scale);
   }
 
   #releaseApplication(application: Application, initialized: boolean): void {
@@ -225,75 +260,15 @@ export class PixiPetRenderer implements PetRendererPort {
 
       application.destroy(
         { removeView: true },
-        { children: true, context: true, texture: true, textureSource: true },
+        {
+          children: true,
+          context: true,
+          texture: false,
+          textureSource: false,
+        },
       );
     } catch {
       // Preserve the original initialization failure after best-effort cleanup.
-    }
-  }
-}
-
-interface PlaceholderMotion {
-  readonly offsetX: number;
-  readonly offsetY: number;
-  readonly rotation: number;
-  readonly scaleX: number;
-  readonly scaleY: number;
-}
-
-function resolvePlaceholderMotion(
-  action: string | undefined,
-  elapsedSeconds: number,
-): PlaceholderMotion {
-  const normalizedAction = action as PlaceholderAction | undefined;
-
-  switch (normalizedAction) {
-    case PLACEHOLDER_STATE_ACTIONS.coding:
-      return {
-        offsetX: Math.sin(elapsedSeconds * 18) * 2,
-        offsetY: Math.sin(elapsedSeconds * 9) * 2,
-        rotation: Math.sin(elapsedSeconds * 18) * 0.015,
-        scaleX: 1,
-        scaleY: 1,
-      };
-    case PLACEHOLDER_STATE_ACTIONS.error:
-      return {
-        offsetX: Math.sin(elapsedSeconds * 32) * 5,
-        offsetY: 2,
-        rotation: Math.sin(elapsedSeconds * 20) * 0.025,
-        scaleX: 1,
-        scaleY: 0.96,
-      };
-    case PLACEHOLDER_STATE_ACTIONS.happy: {
-      const bounce = Math.abs(Math.sin(elapsedSeconds * 5));
-
-      return {
-        offsetX: 0,
-        offsetY: -bounce * 18,
-        rotation: Math.sin(elapsedSeconds * 5) * 0.08,
-        scaleX: 1 + bounce * 0.06,
-        scaleY: 1 - bounce * 0.04,
-      };
-    }
-    case PLACEHOLDER_STATE_ACTIONS.thinking:
-      return {
-        offsetX: Math.sin(elapsedSeconds * 1.7) * 3,
-        offsetY: Math.sin(elapsedSeconds * 2.2) * 4,
-        rotation: Math.sin(elapsedSeconds * 1.7) * 0.06,
-        scaleX: 1,
-        scaleY: 1,
-      };
-    case PLACEHOLDER_STATE_ACTIONS.idle:
-    default: {
-      const breath = Math.sin(elapsedSeconds * 2.4);
-
-      return {
-        offsetX: 0,
-        offsetY: breath * 4,
-        rotation: 0,
-        scaleX: 1 + breath * 0.015,
-        scaleY: 1 - breath * 0.015,
-      };
     }
   }
 }

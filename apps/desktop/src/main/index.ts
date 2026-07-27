@@ -3,6 +3,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { createDesktopTray, type DesktopTrayHandle } from "./desktop-tray.js";
+import { registerDebugIpc } from "./debug-ipc.js";
+import { DebugTelemetryHub } from "./debug-telemetry-hub.js";
+import { createDebugWindow } from "./debug-window.js";
 import {
   createMainWindow,
   type MainWindowHandle,
@@ -18,27 +21,36 @@ import { DESKTOP_WINDOW_SIZE } from "./window-options.js";
 
 const currentDirectory = dirname(fileURLToPath(import.meta.url));
 const isSmokeTest = process.argv.includes("--smoke-test");
+const isDevelopment =
+  !app.isPackaged && Boolean(process.env["ELECTRON_RENDERER_URL"]);
 const SMOKE_TEST_TIMEOUT_MS = 10_000;
 const WINDOW_STATE_RELATIVE_PATH = join("asteria-data", "window-state.json");
 
 let desktopTray: DesktopTrayHandle | null = null;
+let debugIpcDispose: (() => void) | null = null;
+const debugTelemetryHub = new DebugTelemetryHub();
+let debugWindow: BrowserWindow | null = null;
 let isQuitting = false;
 let mainWindow: BrowserWindow | null = null;
 let windowController: WindowController | null = null;
 
-function resolveRendererTarget(): RendererTarget {
+function resolveRendererTarget(entryFile = "index.html"): RendererTarget {
   const developmentUrl = process.env["ELECTRON_RENDERER_URL"];
 
   if (!app.isPackaged && developmentUrl) {
+    const baseUrl = developmentUrl.endsWith("/")
+      ? developmentUrl
+      : `${developmentUrl}/`;
+
     return {
       kind: "url",
-      url: developmentUrl,
+      url: new URL(entryFile, baseUrl).toString(),
     };
   }
 
   return {
     kind: "file",
-    path: join(currentDirectory, "../renderer/index.html"),
+    path: join(currentDirectory, "../renderer", entryFile),
   };
 }
 
@@ -72,6 +84,7 @@ async function openMainWindow(): Promise<MainWindowHandle> {
     join(currentDirectory, "../preload/index.cjs"),
     resolveRendererTarget(),
     initialPosition,
+    isDevelopment,
   );
   const controller = new WindowController({
     initialState,
@@ -93,9 +106,18 @@ async function openMainWindow(): Promise<MainWindowHandle> {
     }
   });
   handle.window.once("closed", () => {
+    if (isDevelopment) {
+      debugTelemetryHub.setConnected(false);
+    }
+
     mainWindow = null;
     windowController = null;
     void controller.dispose();
+  });
+  handle.window.webContents.on("render-process-gone", () => {
+    if (isDevelopment) {
+      debugTelemetryHub.setConnected(false);
+    }
   });
 
   if (!isSmokeTest && desktopTray === null) {
@@ -106,6 +128,13 @@ async function openMainWindow(): Promise<MainWindowHandle> {
       centerWindow() {
         windowController?.centerWindow();
       },
+      ...(isDevelopment
+        ? {
+            openDebugPanel() {
+              showDebugPanel();
+            },
+          }
+        : {}),
       hideWindow() {
         windowController?.hideWindow();
       },
@@ -130,6 +159,42 @@ async function openMainWindow(): Promise<MainWindowHandle> {
   return handle;
 }
 
+function showDebugPanel(): void {
+  if (!isDevelopment || isQuitting) {
+    return;
+  }
+
+  if (debugWindow && !debugWindow.isDestroyed()) {
+    debugWindow.show();
+    debugWindow.focus();
+    return;
+  }
+
+  const handle = createDebugWindow(
+    join(currentDirectory, "../preload/index.cjs"),
+    resolveRendererTarget("debug.html"),
+  );
+  const openedWindow = handle.window;
+
+  debugWindow = openedWindow;
+  openedWindow.once("closed", () => {
+    if (debugWindow === openedWindow) {
+      debugWindow = null;
+    }
+  });
+  void handle.ready.catch((error: unknown) => {
+    console.error("Failed to load the debug Renderer.", error);
+
+    if (!openedWindow.isDestroyed()) {
+      openedWindow.destroy();
+    }
+
+    if (debugWindow === openedWindow) {
+      debugWindow = null;
+    }
+  });
+}
+
 async function quitApplication(): Promise<void> {
   if (isQuitting) {
     return;
@@ -138,6 +203,13 @@ async function quitApplication(): Promise<void> {
   isQuitting = true;
   desktopTray?.destroy();
   desktopTray = null;
+  debugIpcDispose?.();
+  debugIpcDispose = null;
+
+  if (debugWindow && !debugWindow.isDestroyed()) {
+    debugWindow.destroy();
+  }
+  debugWindow = null;
 
   if (windowController) {
     await windowController.dispose();
@@ -210,6 +282,22 @@ function registerApplicationLifecycle(): void {
   void app
     .whenReady()
     .then(async () => {
+      if (isDevelopment) {
+        debugIpcDispose = registerDebugIpc({
+          getDebugWebContents() {
+            return debugWindow && !debugWindow.isDestroyed()
+              ? debugWindow.webContents
+              : undefined;
+          },
+          getDesktopWebContents() {
+            return mainWindow && !mainWindow.isDestroyed()
+              ? mainWindow.webContents
+              : undefined;
+          },
+          telemetryHub: debugTelemetryHub,
+        });
+      }
+
       const handle = await openMainWindow();
 
       if (isSmokeTest) {

@@ -53,3 +53,21 @@ PixiJS 8 的 `Application` 必须异步初始化。Renderer 在初始化过程�
 程序化 Graphics 可以在初始化阶段生成临时 Texture，再通过 Sprite 验证完整渲染链路；正式角色资源和 Resource Loader 不应因此提前进入基础 Renderer 周期。
 
 workspace 包的运行时导出指向 `dist` 时，应用的开发和冒烟命令必须预构建依赖；仅保证根构建拓扑正确不足以支持干净检出后的首次开发启动。
+
+生成式 Sprite Sheet 应先固定角色主设定和状态关键姿势，再逐状态生成小帧表；直接一次生成完整动画更容易发生身份、比例和道具漂移。
+
+纯色键控背景仍可能包含轻微色差或渐变。使用边界采样、软遮罩和去溢色后，再将整张规则网格缩放为固定帧，可保留一致锚点并减少小尺寸边缘杂色。
+
+动画中的关键文字不应依赖图片模型拼写。构建阶段用确定性位图字形写入最终图集，既能保证内容准确，也不需要把角色专属文字规则耦合进通用 Renderer。
+
+## 开发诊断
+
+多 Renderer Process 之间不能共享进程内 Event Bus 或 Runtime。调试窗口必须通过 Main 中转事件和只读遥测，不能创建第二套 Runtime 或复制状态规则。
+
+Runtime 的瞬时状态回落发生在内部调度器中，调试层不应轮询或复制时间规则；由 Runtime 主动发布只读快照更可靠。
+
+electron-vite 5 的实验性 `isolatedEntries` 在非 TTY 构建环境中可能调用不存在的 `process.stdout.clearLine`。单个 Preload Bundle 配合窗口启动参数进行能力隔离，可以同时保持沙箱单文件要求和 CI 构建稳定性。
+
+Renderer 只需要事件常量时不应从包含 Zod Schema 的共享根 Barrel 导入。为纯常量提供窄 Subpath，可避免把边界校验依赖打入高频桌宠 Renderer。
+
+TypeScript 的 `import type` 虽然会在编译后擦除，但应用层仍应从纯契约 Subpath 导入类型。将事件与调试数据的常量/接口放在无运行时校验依赖的模块中，再由 Main 使用 Schema 模块完成边界校验，可同时保持依赖方向清晰和 Renderer Tree Shaking 稳定。

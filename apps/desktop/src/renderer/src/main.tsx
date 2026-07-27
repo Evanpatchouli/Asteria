@@ -1,7 +1,7 @@
-import { PLACEHOLDER_STATE_ACTIONS, PixiPetRenderer } from "@asteria/renderer";
 import { createRoot } from "react-dom/client";
 
 import { App } from "./App.js";
+import { createPetRuntimeComposition } from "./pet-runtime-composition.js";
 import "./styles.css";
 
 const petSurface = document.querySelector<HTMLDivElement>("#pet-surface");
@@ -15,35 +15,42 @@ if (!rootElement) {
   throw new Error("Renderer root element was not found.");
 }
 
-const petRenderer = new PixiPetRenderer({
-  host: petSurface,
-});
+const composition = createPetRuntimeComposition(petSurface);
 let isPageUnloading = false;
 
-const destroyPetRenderer = (): void => {
+const destroyPetRuntime = (): void => {
   isPageUnloading = true;
-  petRenderer.destroy();
+  composition.destroy();
 };
 
 window.addEventListener("pagehide", (event) => {
   if (!event.persisted) {
-    destroyPetRenderer();
+    destroyPetRuntime();
   }
 });
 
-import.meta.hot?.dispose(destroyPetRenderer);
+import.meta.hot?.dispose(destroyPetRuntime);
 
-void petRenderer
-  .initialize()
-  .then(() => {
-    if (!isPageUnloading) {
-      petRenderer.play(PLACEHOLDER_STATE_ACTIONS.idle);
-    }
-  })
-  .catch((error: unknown) => {
-    if (!isPageUnloading) {
-      console.error("Failed to initialize the PixiJS renderer.", error);
-    }
-  });
+void composition.ready.catch((error: unknown) => {
+  if (!isPageUnloading) {
+    window.debugTelemetryApi.report({
+      kind: "log",
+      log: {
+        detail: {
+          en: `Renderer initialization failed: ${formatError(error)}`,
+          zh: `渲染器初始化失败：${formatError(error)}`,
+        },
+        event: "renderer.failed",
+        level: "error",
+        stage: "renderer",
+      },
+    });
+    console.error("Failed to initialize the Pet Runtime.", error);
+  }
+});
+
+function formatError(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
 
 createRoot(rootElement).render(<App />);

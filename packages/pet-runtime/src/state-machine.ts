@@ -1,11 +1,13 @@
 import type { PetState } from "@asteria/shared";
 
+/** Priority table used to arbitrate non-forced state transitions. */
 export const PET_STATE_PRIORITY = {
   idle: 0,
   sleep: 0,
   waiting: 1,
   thinking: 2,
   coding: 3,
+  tooling: 3,
   happy: 4,
   error: 5,
 } as const satisfies Readonly<Record<PetState, number>>;

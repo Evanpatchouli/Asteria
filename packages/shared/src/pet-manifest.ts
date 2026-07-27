@@ -1,11 +1,14 @@
 import { z } from "zod";
 
-export const PET_MANIFEST_PROTOCOL_VERSION = "1.0" as const;
+/** Current pet package manifest protocol accepted by Asteria. */
+export const PET_MANIFEST_PROTOCOL_VERSION = "1.1" as const;
 
+/** Logical states understood by the Pet Runtime. */
 export const PET_STATES = [
   "idle",
   "thinking",
   "coding",
+  "tooling",
   "waiting",
   "happy",
   "error",
@@ -32,6 +35,7 @@ export const petManifestSchema = z
         idle: z.string().min(1),
         thinking: z.string().min(1),
         coding: z.string().min(1),
+        tooling: z.string().min(1),
         happy: z.string().min(1),
         error: z.string().min(1),
         waiting: z.string().min(1).optional(),
@@ -57,8 +61,11 @@ export const petManifestSchema = z
     }
   });
 
+/** Logical state names available to Runtime and Renderer integrations. */
 export type PetState = (typeof PET_STATES)[number];
+/** Validated animation entry declared by a pet package. */
 export type PetAnimation = z.infer<typeof petAnimationSchema>;
+/** Validated Asteria pet package manifest. */
 export type PetManifest = z.infer<typeof petManifestSchema>;
 
 /**
