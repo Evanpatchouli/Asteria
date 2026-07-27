@@ -24,6 +24,19 @@ interface PetRenderer {
 }
 ```
 
+Pet Runtime 使用更窄的接口，避免依赖当前阶段不需要的表现能力：
+
+``` ts
+interface PetRendererPort {
+  initialize(): Promise<void>;
+  play(action: string): void;
+  stop(action: string): void;
+  destroy(): void;
+}
+```
+
+表达式等扩展能力不进入 Phase 1 Runtime Port。
+
 ## 3. 生命周期
 
     create

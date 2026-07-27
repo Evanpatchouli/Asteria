@@ -33,6 +33,12 @@ importers:
         specifier: workspace:*
         version: link:../shared
 
+  packages/pet-runtime:
+    dependencies:
+      '@asteria/shared':
+        specifier: workspace:*
+        version: link:../shared
+
   packages/shared:
     dependencies:
       zod:

@@ -2,20 +2,21 @@
 
 ## 当前状态
 
-MVP Phase 1 周期 2 已完成，共享协议和 Event Bus 可以作为 Pet Runtime 的稳定依赖。
+MVP Phase 1 周期 3 已完成，共享协议、Event Bus 和 Pet Runtime 已具备稳定的独立构建与测试能力。
 
 ## 下一周期建议
 
-实现 `packages/pet-runtime` 的最小状态机：
+实现 `apps/desktop` 的 Electron 基础工程：
 
-- Agent Event 到 Pet State 的映射
-- 状态优先级和有效转换
-- `agent.success` 到 `happy` 的映射
-- 一次性状态回落策略
-- Renderer Port，不依赖 PixiJS
-- Vitest 单元测试
+- Main、Preload、Renderer 三入口
+- 透明、无边框、置顶窗口
+- `contextIsolation: true`
+- `nodeIntegration: false`
+- 类型化的最小 Preload API
+- Vite 开发与构建流程
+- Electron 启动冒烟验证
 
-下一周期不应同时实现 Electron 或 PixiJS。
+下一周期不应同时集成 PixiJS 或 Claude Code Hook。
 
 ## 已知事项
 

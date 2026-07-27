@@ -10,15 +10,13 @@
 
 ``` ts
 interface PetRuntime {
+  initialize(): Promise<void>;
 
   dispatch(event: AgentEvent): void;
 
-  changeState(state: PetState): void;
+  currentState(): PetState;
 
-  playAction(action: string): void;
-
-  setEmotion(emotion: Emotion): void;
-
+  destroy(): void;
 }
 ```
 
@@ -30,6 +28,17 @@ Runtime 负责：
 -   状态转换
 -   动作调度
 -   Renderer 调用
+
+Runtime 通过构造参数接收：
+
+-   `PetRendererPort`
+-   `RuntimeScheduler`
+-   `PetStateActionMap`
+-   瞬时状态持续时间
+
+`happy` 和 `error` 是瞬时状态，到期后强制回到 `idle`。
+
+外部模块不得绕过 `dispatch` 直接修改状态。
 
 ## 4. 不负责
 
