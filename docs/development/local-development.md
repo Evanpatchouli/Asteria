@@ -35,6 +35,16 @@ pnpm smoke:desktop
 
 冒烟验证会确认 Renderer 成功加载、窗口保持置顶，并且类型化 Preload API 已注入。
 
+窗口状态保存在 Electron `userData/asteria-data/window-state.json`。删除该文件后，窗口会在下一次启动时回到主显示器工作区右下角。
+
+系统托盘菜单提供：
+
+-   显示或隐藏窗口
+-   开启或关闭鼠标穿透
+-   退出应用
+
+开启鼠标穿透后无法直接点击窗口，应通过托盘菜单关闭。
+
 ## 3. 开发结构
 
     apps/

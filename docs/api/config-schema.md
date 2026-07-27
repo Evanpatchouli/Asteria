@@ -36,3 +36,24 @@
 -   version 字段
 -   migration
 -   默认值补全
+
+## 5. 窗口状态
+
+窗口原生状态保存在 Main Process 私有文件中，不通过 Renderer `localStorage` 管理：
+
+``` json
+{
+  "version": 1,
+  "position": {
+    "x": 100,
+    "y": 200
+  },
+  "clickThrough": false
+}
+```
+
+文件位置：
+
+    userData/asteria-data/window-state.json
+
+文件缺失、损坏或版本不支持时回退到默认状态，不阻止应用启动。

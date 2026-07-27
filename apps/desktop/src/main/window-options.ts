@@ -1,4 +1,4 @@
-import type { BrowserWindowConstructorOptions } from "electron";
+import type { BrowserWindowConstructorOptions, Point } from "electron";
 
 export const DESKTOP_WINDOW_SIZE = {
   height: 360,
@@ -13,9 +13,11 @@ export const DESKTOP_WINDOW_SIZE = {
  */
 export function createDesktopWindowOptions(
   preloadPath: string,
+  position?: Point,
 ): BrowserWindowConstructorOptions {
   return {
     ...DESKTOP_WINDOW_SIZE,
+    ...(position ? position : {}),
     alwaysOnTop: true,
     autoHideMenuBar: true,
     backgroundColor: "#00000000",

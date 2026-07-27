@@ -27,3 +27,14 @@
 - `@asteria/shared/ipc` 作为 Preload 的窄共享契约入口，避免把事件校验 Schema 打入 Preload 启动包。
 - 外部 Agent Event 由 Main Process 使用 `forwardAgentEvent` 完成运行时校验后再发送，Preload 只接收已验证事件。
 - 生产 Renderer CSP 不开放 WebSocket；开发 CSP 仅允许 localhost 和 127.0.0.1 的 Vite HMR WebSocket。
+
+## 2026-07-28：桌面窗口交互
+
+- 首次启动位置为主显示器工作区右下角，右侧和底部各保留 `24px`。
+- 合法保存位置优先恢复；位置完全离开当前显示器时回退主屏右下角。
+- 用户主动放置的部分离屏位置不做整窗夹紧；横纵各至少 `64px` 可见时精确恢复，不足时只移动到最低可见范围。
+- 窗口位置、鼠标穿透、显示和隐藏由 Main Process 的 Window Controller 管理。
+- Renderer 只通过 CSS `app-region: drag` 声明拖动区域，不自行计算原生窗口坐标。
+- 系统托盘是隐藏窗口和鼠标穿透状态的永久恢复入口。
+- 窗口状态使用 Main 私有版本化 JSON 文件，不进入共享 IPC 契约或 Renderer `localStorage`。
+- 应用使用 Electron 单实例锁，避免重复窗口、托盘和跨进程状态文件写入竞争；第二实例只唤醒现有窗口。

@@ -44,6 +44,7 @@
 -   创建窗口
 -   生命周期管理
 -   系统托盘
+-   窗口位置和鼠标穿透状态
 -   全局快捷键
 -   文件系统
 -   原生 API
@@ -88,3 +89,5 @@ Renderer Window 必须启用：
 -   Renderer 直接访问系统权限
 -   Main 参与动画逻辑
 -   Agent 逻辑耦合窗口代码
+
+窗口拖动使用 Renderer 的 CSS `app-region: drag` 声明，但坐标恢复、持久化、显示、隐藏和鼠标穿透均由 Main Process 管理。

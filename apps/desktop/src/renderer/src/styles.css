@@ -35,6 +35,7 @@ body,
 }
 
 .runtime-status {
+  app-region: drag;
   display: grid;
   width: 100%;
   min-height: 190px;
@@ -46,6 +47,11 @@ body,
   background: rgba(16, 18, 24, 0.84);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
   text-align: center;
+  user-select: none;
+}
+
+[data-window-interactive] {
+  app-region: no-drag;
 }
 
 .runtime-mark {

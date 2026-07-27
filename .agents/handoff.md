@@ -2,37 +2,37 @@
 
 ## 当前状态
 
-MVP Phase 1 周期 4 已完成，`apps/desktop` 已具备 Electron Main、Preload、Renderer 三入口和稳定的开发、构建、测试及启动冒烟流程。
+MVP Phase 1 周期 5 实现已完成，窗口具备位置恢复、拖动、鼠标穿透和系统托盘控制能力。功能测试由用户执行，当前等待人工验收反馈。
 
 已完成：
 
-- 透明、无边框、始终置顶的 360 × 360 桌面窗口
-- 标准 Electron 应用生命周期
-- `contextIsolation: true`
-- `nodeIntegration: false`
-- `sandbox: true`
-- 复用共享 IPC 契约的类型化 Preload API
-- React + TypeScript 透明占位 Renderer
-- electron-vite 开发与生产构建
-- 窗口配置与 Preload 契约测试
-- 自动退出式 Electron 启动冒烟
+- 首次启动定位到主显示器工作区右下角，右侧和底部各留 `24px`
+- 精确恢复横纵各至少 `64px` 可见的部分离屏位置；不足时只修正到最低可见范围
+- 完全离屏时回退主屏右下角，并处理多显示器工作区变化
+- CSS 原生无框窗口拖动区域
+- 整窗口鼠标穿透开关
+- 系统托盘显示、隐藏、关闭穿透和退出入口
+- 非抢焦点窗口显示
+- 单实例锁和第二实例唤醒
+- 原子、串行的窗口状态持久化
 
 ## 下一周期建议
 
-实现窗口基础交互：
+人工验收周期 5 后，进入 PixiJS Renderer MVP：
 
-- 可拖动区域
-- 窗口位置保存与屏幕边界恢复
-- 可配置的点击穿透
-- 显示、隐藏与退出入口
+- Canvas 初始化和透明背景
+- PixiJS Renderer 生命周期
+- 默认占位 Sprite
+- 独立于 React 的动画循环
+- Renderer Port 适配
 
-建议窗口交互稳定后再进入 PixiJS Renderer 周期，不应同时接入 Claude Code Hook。
+仍不应同时接入 Claude Code Hook。
 
 ## 已知事项
 
-- 裸 `pnpm` 由 `C:\Users\31250\.vite-plus\bin\pnpm.exe` 提供；仓库已通过 `packageManager` 固定 pnpm 10.33.4。
-- 原有 Markdown 未统一经过 Prettier，已从自动格式检查中排除，避免无关重写。
-- `pnpm test` 会先构建 workspace，确保测试不依赖残留 `dist`。
-- Electron 43 在首次执行 CLI 时按需下载二进制，首次 `pnpm dev` 或 `pnpm smoke:desktop` 会明显更慢。
-- 沙箱 Preload 使用单文件 CommonJS 产物；不要改回 `.mjs` 或通过关闭 sandbox 规避限制。
-- 当前 Renderer 仅为基础占位 UI，未集成 PixiJS、Pet Runtime 或 Agent Event 生产者。
+- 功能测试和启动冒烟未由 Codex 执行，需依据交付测试清单人工验收。
+- Windows 关机或注销不保证触发 `before-quit`，强制结束前最后约 `250ms` 的拖动位置可能来不及保存。
+- 窗口允许按用户意图部分离屏，但恢复时横纵各至少保留 `64px` 可见区域。
+- Wayland 无法保证全局窗口定位和鼠标穿透行为，当前按 Windows MVP 验收。
+- CSS `app-region: drag` 区域不接收普通指针交互，未来宠物点击区域需要显式设置 `app-region: no-drag`。
+- 系统托盘的设置入口尚未实现，将与设置中心一并处理。

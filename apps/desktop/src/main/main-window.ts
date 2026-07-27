@@ -1,4 +1,4 @@
-import { BrowserWindow } from "electron";
+import { BrowserWindow, type Point } from "electron";
 
 import { createDesktopWindowOptions } from "./window-options.js";
 
@@ -23,8 +23,11 @@ export interface MainWindowHandle {
 export function createMainWindow(
   preloadPath: string,
   rendererTarget: RendererTarget,
+  position?: Point,
 ): MainWindowHandle {
-  const window = new BrowserWindow(createDesktopWindowOptions(preloadPath));
+  const window = new BrowserWindow(
+    createDesktopWindowOptions(preloadPath, position),
+  );
 
   window.once("ready-to-show", () => {
     window.show();
