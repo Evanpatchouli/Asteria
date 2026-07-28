@@ -4,13 +4,21 @@
       "thinking-0",
       "thinking-1",
       "thinking-2",
+      "thinking-1",
+      "thinking-0",
       "thinking-3",
       "thinking-4",
-      "thinking-5"
+      "thinking-5",
+      "thinking-4",
+      "thinking-3"
     ]
   },
   "frames": {
     "thinking-0": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.898438
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -31,6 +39,10 @@
       "trimmed": false
     },
     "thinking-1": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.898438
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -51,6 +63,10 @@
       "trimmed": false
     },
     "thinking-2": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.898438
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -71,6 +87,10 @@
       "trimmed": false
     },
     "thinking-3": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.792969
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -91,6 +111,10 @@
       "trimmed": false
     },
     "thinking-4": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.792969
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -111,6 +135,10 @@
       "trimmed": false
     },
     "thinking-5": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.792969
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -140,6 +168,6 @@
       "h": 512,
       "w": 768
     },
-    "version": "1.0"
+    "version": "1.1"
   }
 }

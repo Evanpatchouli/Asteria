@@ -45,6 +45,11 @@ interface PetRendererPort {
 状态动作映射来自已校验 Manifest，并由 Desktop 组合根交给 Pet Runtime。
 Renderer 不解释 Agent Event 或宠物状态；未在资源包注册的动作会明确失败。
 
+`PixiPetRenderer` 使用内部双 Sprite 平滑动画器。资源中的帧率表示关键姿势时钟，
+私有 Ticker 在最高 `60Hz` 下持续计算相邻姿势的过渡，因此不会把 React 或
+Manifest 帧率等同于显示刷新率。过渡期间至少保留一个完全不透明的姿势，避免
+普通线性淡化让浅色角色变灰。
+
 ## 3. 生命周期
 
     create
@@ -78,7 +83,8 @@ Renderer 不解释 Agent Event 或宠物状态；未在资源包注册的动作�
 
 -   透明 WebGL Canvas
 -   应用私有 Ticker，最高 `60 FPS`
--   `AnimatedSprite.autoUpdate = false`，由私有 Ticker 显式推进
+-   双 Sprite 关键姿势插值，由私有 Ticker 显式推进
+-   每张纹理的 `defaultAnchor` 对齐角色语义根部
 -   角色帧默认占视口短边 `36%`，保留桌宠所需的小尺寸和透明活动空间
 -   独立于 React 的逐帧更新
 -   销毁时释放 Ticker、场景、图集纹理、Canvas 和 GPU Context

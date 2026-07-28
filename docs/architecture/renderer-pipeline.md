@@ -74,7 +74,8 @@ Manifest，再把 Manifest 状态动作映射交给 Pet Runtime；Runtime 通过
 -   `PixiPetRenderer`
 -   透明 Canvas
 -   Manifest 1.1 资源加载器
--   PixiJS `Spritesheet` 与 `AnimatedSprite`
+-   PixiJS `Spritesheet` 与双 Sprite 平滑动画器
+-   语义根部锚点与 `60Hz` 关键姿势过渡
 -   Lumi 六状态动画图集
 -   `PetRendererPort` 适配
 

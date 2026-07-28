@@ -6,11 +6,19 @@
       "tooling-2",
       "tooling-3",
       "tooling-4",
-      "tooling-5"
+      "tooling-5",
+      "tooling-4",
+      "tooling-3",
+      "tooling-2",
+      "tooling-1"
     ]
   },
   "frames": {
     "tooling-0": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.902344
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -31,6 +39,10 @@
       "trimmed": false
     },
     "tooling-1": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.902344
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -51,6 +63,10 @@
       "trimmed": false
     },
     "tooling-2": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.898438
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -71,6 +87,10 @@
       "trimmed": false
     },
     "tooling-3": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.804688
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -91,6 +111,10 @@
       "trimmed": false
     },
     "tooling-4": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.804688
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -111,6 +135,10 @@
       "trimmed": false
     },
     "tooling-5": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.800781
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -140,6 +168,6 @@
       "h": 512,
       "w": 768
     },
-    "version": "1.0"
+    "version": "1.1"
   }
 }

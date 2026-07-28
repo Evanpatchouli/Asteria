@@ -1,11 +1,12 @@
 import type { PetRendererPort } from "@asteria/pet-runtime";
 import "pixi.js/unsafe-eval";
-import { AnimatedSprite, Application, type Ticker } from "pixi.js";
+import { Application, type Ticker } from "pixi.js";
 
 import type {
   LoadedPixiAnimation,
   LoadedPixiPetPackage,
 } from "./pixi-pet-package-loader.js";
+import { SmoothSpriteAnimator } from "./smooth-sprite-animator.js";
 
 const MAXIMUM_FRAMES_PER_SECOND = 60;
 const VIEWPORT_FILL_RATIO = 0.36;
@@ -19,16 +20,18 @@ export interface PixiPetRendererOptions {
 }
 
 /**
- * PixiJS AnimatedSprite implementation of the Pet Runtime renderer port.
+ * Smooth PixiJS sprite implementation of the Pet Runtime renderer port.
  */
 export class PixiPetRenderer implements PetRendererPort {
   readonly #host: HTMLElement;
+  readonly #maximumFrameHeight: number;
+  readonly #maximumFrameWidth: number;
   readonly #package: LoadedPixiPetPackage;
   readonly #resolution: number;
   #activeAction: string | undefined;
   #application: Application | undefined;
   #initialization: Promise<void> | undefined;
-  #sprite: AnimatedSprite | undefined;
+  #animator: SmoothSpriteAnimator | undefined;
   #status: RendererStatus = "created";
 
   public constructor(options: PixiPetRendererOptions) {
@@ -41,6 +44,8 @@ export class PixiPetRenderer implements PetRendererPort {
 
     this.#host = options.host;
     this.#package = options.package;
+    this.#maximumFrameHeight = maximumFrameDimension(options.package, "height");
+    this.#maximumFrameWidth = maximumFrameDimension(options.package, "width");
     this.#resolution = options.resolution ?? window.devicePixelRatio;
   }
 
@@ -85,20 +90,15 @@ export class PixiPetRenderer implements PetRendererPort {
     }
 
     const animation = this.#animationFor(action);
-    const sprite = this.#sprite;
+    const animator = this.#animator;
 
-    if (!sprite) {
-      throw new Error("PixiPetRenderer animation sprite is unavailable.");
+    if (!animator) {
+      throw new Error("PixiPetRenderer animation renderer is unavailable.");
     }
 
     this.#activeAction = action;
-    sprite.stop();
-    sprite.textures = [...animation.textures];
-    sprite.animationSpeed = animation.frameRate / MAXIMUM_FRAMES_PER_SECOND;
-    sprite.loop = animation.loop;
-    sprite.visible = true;
-    sprite.gotoAndPlay(0);
-    this.#layoutSprite();
+    animator.play(animation);
+    this.#layoutAnimator();
   }
 
   /**
@@ -113,10 +113,7 @@ export class PixiPetRenderer implements PetRendererPort {
 
     this.#activeAction = undefined;
 
-    if (this.#sprite) {
-      this.#sprite.stop();
-      this.#sprite.visible = false;
-    }
+    this.#animator?.stop();
   }
 
   /**
@@ -173,23 +170,17 @@ export class PixiPetRenderer implements PetRendererPort {
         throw new Error("The pet package does not contain any animations.");
       }
 
-      const sprite = new AnimatedSprite({
-        autoUpdate: false,
-        textures: [...initialAnimation.textures],
-      });
+      const animator = new SmoothSpriteAnimator(initialAnimation);
 
-      this.#sprite = sprite;
-      sprite.anchor.set(0.5);
-      sprite.eventMode = "none";
-      sprite.visible = false;
+      this.#animator = animator;
       application.stage.eventMode = "none";
-      application.stage.addChild(sprite);
+      application.stage.addChild(animator.view);
       application.canvas.classList.add("pixi-canvas");
       application.ticker.maxFPS = MAXIMUM_FRAMES_PER_SECOND;
       application.ticker.add(this.#update);
       this.#host.replaceChildren(application.canvas);
       this.#status = "ready";
-      this.#layoutSprite();
+      this.#layoutAnimator();
       application.start();
     } catch (error: unknown) {
       this.#releaseApplication(application, initialized);
@@ -203,8 +194,8 @@ export class PixiPetRenderer implements PetRendererPort {
   }
 
   readonly #update = (ticker: Ticker): void => {
-    this.#sprite?.update(ticker);
-    this.#layoutSprite();
+    this.#animator?.update(ticker.deltaMS);
+    this.#layoutAnimator();
   };
 
   #animationFor(action: string): LoadedPixiAnimation {
@@ -223,33 +214,32 @@ export class PixiPetRenderer implements PetRendererPort {
     }
   }
 
-  #layoutSprite(): void {
+  #layoutAnimator(): void {
     const application = this.#application;
-    const sprite = this.#sprite;
+    const animator = this.#animator;
 
-    if (!application || !sprite) {
+    if (!application || !animator) {
       return;
     }
 
-    const frameWidth = sprite.texture.orig.width;
-    const frameHeight = sprite.texture.orig.height;
     const scale =
       Math.min(
-        application.screen.width / frameWidth,
-        application.screen.height / frameHeight,
+        application.screen.width / this.#maximumFrameWidth,
+        application.screen.height / this.#maximumFrameHeight,
       ) * VIEWPORT_FILL_RATIO;
 
-    sprite.position.set(
+    animator.view.position.set(
       application.screen.width / 2,
       application.screen.height / 2,
     );
-    sprite.scale.set(scale);
+    animator.view.scale.set(scale);
   }
 
   #releaseApplication(application: Application, initialized: boolean): void {
     if (this.#application === application) {
       this.#application = undefined;
-      this.#sprite = undefined;
+      this.#animator?.destroy();
+      this.#animator = undefined;
     }
 
     try {
@@ -271,4 +261,19 @@ export class PixiPetRenderer implements PetRendererPort {
       // Preserve the original initialization failure after best-effort cleanup.
     }
   }
+}
+
+function maximumFrameDimension(
+  petPackage: LoadedPixiPetPackage,
+  dimension: "height" | "width",
+): number {
+  let maximum = 1;
+
+  for (const animation of petPackage.animations.values()) {
+    for (const texture of animation.textures) {
+      maximum = Math.max(maximum, texture.orig[dimension]);
+    }
+  }
+
+  return maximum;
 }

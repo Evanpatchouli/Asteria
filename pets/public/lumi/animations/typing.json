@@ -6,11 +6,19 @@
       "typing-2",
       "typing-3",
       "typing-4",
-      "typing-5"
+      "typing-5",
+      "typing-4",
+      "typing-3",
+      "typing-2",
+      "typing-1"
     ]
   },
   "frames": {
     "typing-0": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.851562
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -31,6 +39,10 @@
       "trimmed": false
     },
     "typing-1": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.855469
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -51,6 +63,10 @@
       "trimmed": false
     },
     "typing-2": {
+      "anchor": {
+        "x": 0.451172,
+        "y": 0.859375
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -71,6 +87,10 @@
       "trimmed": false
     },
     "typing-3": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.761719
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -91,6 +111,10 @@
       "trimmed": false
     },
     "typing-4": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.757812
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -111,6 +135,10 @@
       "trimmed": false
     },
     "typing-5": {
+      "anchor": {
+        "x": 0.462891,
+        "y": 0.769531
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -140,6 +168,6 @@
       "h": 512,
       "w": 768
     },
-    "version": "1.0"
+    "version": "1.1"
   }
 }

@@ -1,9 +1,24 @@
 {
   "animations": {
-    "error": ["error-0", "error-1", "error-2", "error-3", "error-4", "error-5"]
+    "error": [
+      "error-0",
+      "error-1",
+      "error-2",
+      "error-3",
+      "error-4",
+      "error-5",
+      "error-4",
+      "error-3",
+      "error-2",
+      "error-1"
+    ]
   },
   "frames": {
     "error-0": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.835938
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -24,6 +39,10 @@
       "trimmed": false
     },
     "error-1": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.84375
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -44,6 +63,10 @@
       "trimmed": false
     },
     "error-2": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.84375
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -64,6 +87,10 @@
       "trimmed": false
     },
     "error-3": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.679688
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -84,6 +111,10 @@
       "trimmed": false
     },
     "error-4": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.691406
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -104,6 +135,10 @@
       "trimmed": false
     },
     "error-5": {
+      "anchor": {
+        "x": 0.501953,
+        "y": 0.695312
+      },
       "frame": {
         "h": 256,
         "w": 256,
@@ -133,6 +168,6 @@
       "h": 512,
       "w": 768
     },
-    "version": "1.0"
+    "version": "1.1"
   }
 }

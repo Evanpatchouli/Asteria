@@ -1,12 +1,12 @@
 {
   "animations": {
     "idle": {
-      "frameRate": 8,
+      "frameRate": 20,
       "loop": true,
       "source": "animations/idle.json"
     },
     "thinking": {
-      "frameRate": 6,
+      "frameRate": 10,
       "loop": true,
       "source": "animations/thinking.json"
     },
@@ -16,17 +16,17 @@
       "source": "animations/typing.json"
     },
     "tooling": {
-      "frameRate": 8,
+      "frameRate": 10,
       "loop": true,
       "source": "animations/tooling.json"
     },
     "celebrate": {
-      "frameRate": 8,
+      "frameRate": 10,
       "loop": false,
       "source": "animations/celebrate.json"
     },
     "error": {
-      "frameRate": 8,
+      "frameRate": 10,
       "loop": true,
       "source": "animations/error.json"
     }
