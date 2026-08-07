@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-MVP Phase 0 技术闭环与 Lumi 正式 Sprite 动画已实现：开发调试面板发送的模拟 Agent Event 会通过 Main 校验、正式 IPC、Event Bus 和 Pet Runtime 驱动六状态 PixiJS 动画。功能测试由用户执行，当前等待 Lumi 动画人工验收。
+MVP Phase 0 技术闭环与 Lumi 正式 Sprite 动画已实现：开发调试面板发送的模拟 Agent Event 会通过 Main 校验、正式 IPC、Event Bus 和 Pet Runtime 驱动六状态 PixiJS 动画。Lumi 动画已于 2026-08-07 通过用户人工验收，Phase 0 可以结束并进入 Phase 1。
 
 已完成：
 
@@ -41,7 +41,7 @@ MVP Phase 0 技术闭环与 Lumi 正式 Sprite 动画已实现：开发调试面
 
 ## 下一周期建议
 
-人工验收 Lumi 动画后，进入 Phase 1 的 Claude Code Adapter 接入：
+进入 Phase 1 的 Claude Code Adapter 接入：
 
 - 定义 Claude Code Hook 输入边界
 - 在 Main Process 实现内置 Claude Adapter
@@ -52,7 +52,7 @@ MVP Phase 0 技术闭环与 Lumi 正式 Sprite 动画已实现：开发调试面
 
 ## 已知事项
 
-- 功能测试和启动冒烟未由 Codex 执行，需依据交付测试清单人工验收。
+- Lumi 动画已通过用户人工验收；启动冒烟仍未由 Codex 执行。
 - Lumi 循环动作仍属于 MVP Sprite 动画，不是逐帧手绘长动画。
 - 成功动画已补充真实朝向和触地姿势；相邻姿势仍可能出现轻微双 Sprite 重影，
   后续应继续补充高价值关键姿势，而不是复制相同帧。
